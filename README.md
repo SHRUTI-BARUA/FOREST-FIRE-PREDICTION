@@ -1,4 +1,4 @@
-his project is a Forest Fire Prediction Web App currently under development.
+This project is a Forest Fire Prediction Web App currently under development.
 It includes a secure authentication system (Signup, Login, and User Verification) and a connected MongoDB backend.
 The next phase will integrate the ML fire prediction model.
 
