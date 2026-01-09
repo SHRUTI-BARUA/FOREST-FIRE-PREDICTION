@@ -92,12 +92,20 @@ const Login = () => {
         </div>
 
         <button type="submit">Login</button>
+        
 
-        <span>
-          <span style={{ color: "black" }}>Don’t have an account?</span>{" "}
-          <Link to="/signup">Signup</Link>
-        </span>
 
+        <div style={{ textAlign: "center", marginTop: "1rem", lineHeight: "1.5" }}>
+  <span style={{ color: "black" }}>Don’t have an account? </span>
+  <Link to="/signup" style={{ color: "#28dcfc", textDecoration: "none", fontWeight: "500" }}>
+    Signup
+  </Link>
+  <div style={{ marginTop: "0.5rem" }}>
+    <Link to="/forgot-password" style={{ color: "#28dcfc", textDecoration: "none", fontSize: "0.9rem" }}>
+      Forgot Password?
+    </Link>
+  </div>
+</div>
 
       </form>
 

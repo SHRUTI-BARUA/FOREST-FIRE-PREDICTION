@@ -73,7 +73,7 @@ const FirePrediction = ({ onLogout }) => { // <-- accept onLogout as prop
             setOutput(
                 <div className={`output-message ${newRiskLevel}`}>
                     🔥 Fire Risk: <strong>{fire ? "YES" : "NO"}</strong><br />
-                    📊 Confidence: <strong>{probability}%</strong>
+                    
                 </div>
             );
 
