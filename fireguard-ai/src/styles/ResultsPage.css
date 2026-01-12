@@ -1,0 +1,285 @@
+/* 1. GLOBAL UI RESET & SCROLLBAR REMOVAL */
+
+* {
+    scrollbar-width: none;
+    /* Firefox */
+    /* -ms-overflow-style: none; */
+    /* IE/Edge */
+    box-sizing: border-box;
+}
+
+*::-webkit-scrollbar {
+    display: none;
+    /* Chrome/Safari */
+}
+
+html,
+body {
+    margin: 0;
+    padding: 0;
+    /* height: 100vh; */
+    width: 100vw;
+    /* overflow: hidden; */
+    /* Prevent scrolling */
+    background: linear-gradient(270deg, #7fd3ed, #a1e8cc, #b9fbc0, #80ced6);
+    background-size: 600% 600%;
+    animation: flowGradient 12s ease infinite;
+    font-family: 'Inter', sans-serif;
+}
+
+@keyframes flowGradient {
+    0% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+
+/* 2. LAYOUT GRID */
+
+.page-layout {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    width: 100vw;
+    overflow: hidden;
+}
+
+.content-container {
+    display: grid;
+    grid-template-columns: 380px 1fr;
+    gap: 30px;
+    padding: 30px;
+    margin-top: 70px;
+    height: calc(100vh - 70px);
+}
+
+
+/* 3. GLASS GLASS DASHBOARD */
+
+.card-box {
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(20px);
+    border-radius: 35px;
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    height: 100%;
+}
+
+.card-orange-header {
+    background: linear-gradient(90deg, #ff5e00, #ff9200);
+    padding: 25px;
+    color: white;
+    font-weight: 800;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+}
+
+.analysis-section {
+    padding: 35px 30px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+}
+
+
+/* 4. THE RADAR & BOLD BLACK PROBABILITY */
+
+.circle-container {
+    position: relative;
+    width: 220px;
+    height: 220px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 10px;
+}
+
+.outer-ring {
+    position: absolute;
+    width: 215px;
+    height: 215px;
+    border: 2px dashed rgba(78, 154, 146, 0.4);
+    border-radius: 50%;
+    animation: rotateRing 15s linear infinite;
+    z-index: 1;
+}
+
+@keyframes rotateRing {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.svg-circle {
+    transform: rotate(-90deg);
+    z-index: 2;
+}
+
+.circle-bg {
+    fill: none;
+    stroke: rgba(0, 0, 0, 0.05);
+    stroke-width: 10;
+}
+
+.circle-progress {
+    fill: none;
+    stroke-width: 12;
+    stroke-linecap: round;
+    transition: stroke-dashoffset 0.4s ease-out;
+}
+
+
+/* THE BOLD BLACK NUMBER FIX */
+
+.percentage-text-wrapper {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 3;
+}
+
+.percentage-text-wrapper h1 {
+    font-size: 3.2rem;
+    /* Increased size */
+    margin: 0;
+    color: #000000;
+    /* Pure Black */
+    font-weight: 900;
+    line-height: 1;
+    letter-spacing: -1px;
+}
+
+.percentage-text-wrapper span {
+    font-size: 0.65rem;
+    color: #4e9a92;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-top: 5px;
+}
+
+
+/* 5. SIDEBAR UI ELEMENTS */
+
+.sidebar-label {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: #4e9a92;
+    text-transform: uppercase;
+    margin-bottom: 25px;
+    display: block;
+}
+
+.risk-status-box {
+    width: 100%;
+    padding: 22px;
+    border-radius: 22px;
+    font-weight: 900;
+    font-size: 1.35rem;
+    text-align: center;
+    border: 3px solid;
+}
+
+.risk-yes {
+    background: rgba(255, 49, 49, 0.1);
+    color: #ff3131;
+    border-color: #ff3131;
+}
+
+.risk-no {
+    background: rgba(0, 255, 65, 0.1);
+    color: #008f11;
+    border-color: #00ff41;
+}
+
+.risk-pulse {
+    filter: drop-shadow(0 0 15px rgba(255, 49, 49, 0.3));
+    animation: pulseGlow 2s infinite ease-in-out;
+}
+
+@keyframes pulseGlow {
+    0%,
+    100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.03);
+    }
+}
+
+
+/* 6. MAP STYLING */
+
+.map-output-display {
+    width: 100%;
+    height: 100%;
+    border-radius: 40px;
+    overflow: hidden;
+    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.25);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+}
+
+.leaflet-full-height {
+    height: 100%;
+    width: 100%;
+}
+
+.btn-back {
+    background: #1a2e26;
+    color: white;
+    border: none;
+    padding: 18px;
+    border-radius: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    width: 100%;
+    transition: 0.3s ease;
+}
+
+.btn-back:hover {
+    background: #000000;
+    transform: translateY(-3px);
+}
+
+
+/* LOADER */
+
+.spinner {
+    width: 50px;
+    height: 50px;
+    border: 5px solid #f3f3f3;
+    border-top: 5px solid #ff5e00;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 20px;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}

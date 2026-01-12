@@ -1,0 +1,224 @@
+/* -------------------
+   GLOBAL STYLES
+------------------- */
+html {
+    scroll-behavior: smooth;
+    height: 100%;
+    overflow-x: hidden;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Arial', sans-serif;
+    height: 100%;
+}
+
+/* -------------------
+   HOME CONTAINER
+------------------- */
+.home-container {
+    width: 100%;
+    background: #f8fafc;
+}
+
+/* -------------------
+   HERO SECTION
+------------------- */
+.hero-full-viewport {
+    position: relative;
+    width: 100%;
+    min-height: 100vh; /* ensures full viewport */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #0f172a;
+    overflow: hidden;
+display: flex;
+flex-direction: column;      /* stack content top-down */
+justify-content: flex-start; /* align to top instead of center */
+align-items: center;         /* keep horizontal centering */
+padding-top: 20px;           /* small space from top */
+
+
+}
+
+.hero-bg-wrapper {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
+
+.hero-img-animated {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    animation: kenBurnsZoom 20s infinite alternate ease-in-out;
+    transform-origin: top center; /* zoom from top so upper part stays visible */
+
+}
+
+/* Zoom animation */
+@keyframes kenBurnsZoom {
+    0% {
+        transform: scale(1);
+    }
+    100% {
+        transform: scale(1.15);
+    }
+}
+
+/* Dark overlay */
+.hero-overlay-dark {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+    z-index: 2;
+}
+
+/* Content on top */
+.hero-content-layer {
+    position: relative;
+    z-index: 50;
+    color: white;
+    text-align: center;
+    padding: 0 20px; /* ensures text doesn’t overflow on small screens */
+}
+
+/* Hero title */
+.hero-display-title {
+    font-size: clamp(2rem, 8vw, 4.2rem);
+    font-weight: 900;
+    line-height: 1.1;
+    text-transform: uppercase;
+    margin: 0;
+}
+
+/* Glowing text colors */
+.text-fire-glow {
+    color: #f97316;
+}
+
+.text-emerald-glow {
+    color: #34d399;
+}
+
+/* -------------------
+   BUTTON
+------------------- */
+.btn-fire-pulse {
+    padding: 15px 40px;
+    background: linear-gradient(135deg, #f97316, #ef4444);
+    color: white;
+    border-radius: 50px;
+    font-weight: 800;
+    font-size: clamp(1rem, 2.5vw, 1.2rem);
+    border: none;
+    cursor: pointer;
+    margin-top: 30px;
+    box-shadow: 0 0 0 0 rgba(249, 115, 22, 0.7);
+    animation: pulse-glow-fire 2s infinite;
+    transition: transform 0.2s;
+}
+
+.btn-fire-pulse:hover {
+    transform: scale(1.05);
+}
+
+@keyframes pulse-glow-fire {
+    0% { box-shadow: 0 0 0 0 rgba(249, 115, 22, 0.7); }
+    70% { box-shadow: 0 0 0 20px rgba(249, 115, 22, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(249, 115, 22, 0); }
+}
+
+/* -------------------
+   BOTTOM CURVE
+------------------- */
+.bottom-curve-divider {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 10vh; /* scales with screen height */
+    background: #f8fafc;
+    clip-path: ellipse(70% 100% at 50% 100%);
+    z-index: 5;
+}
+
+/* -------------------
+   FEATURES SECTION
+------------------- */
+.features-compact-section {
+    padding: 100px 5%;
+    background: #f8fafc;
+    min-height: 600px;
+}
+
+.section-title-center {
+    text-align: center;
+    font-size: clamp(2rem, 5vw, 2.5rem);
+    margin-bottom: 50px;
+    color: #1e293b;
+}
+
+.features-4-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 25px;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+/* Floating badges */
+.ai-badge-floating {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(5px);
+    padding: 8px 20px;
+    border-radius: 30px;
+    display: inline-block;
+    margin-bottom: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* -------------------
+   RESPONSIVE ADJUSTMENTS
+------------------- */
+@media (max-width: 768px) {
+    .hero-full-viewport {
+        min-height: 80vh;
+    }
+
+    .hero-display-title {
+        font-size: clamp(1.8rem, 10vw, 3rem);
+    }
+
+    .btn-fire-pulse {
+        padding: 12px 30px;
+    }
+
+    .features-compact-section {
+        padding: 70px 5%;
+    }
+}
+
+@media (max-width: 480px) {
+    .hero-full-viewport {
+        min-height: 70vh;
+    }
+
+    .hero-display-title {
+        font-size: clamp(1.5rem, 12vw, 2.5rem);
+    }
+
+    .btn-fire-pulse {
+        padding: 10px 25px;
+        font-size: 1rem;
+    }
+
+    .features-compact-section {
+        padding: 50px 5%;
+    }
+}

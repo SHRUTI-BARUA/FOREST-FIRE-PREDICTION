@@ -150,31 +150,23 @@ module.exports.Login = async (req, res) => {
       .json({ message: "Server error during login", success: false });
   }
 };
-/* -------------------------------------------------------------
-   ✅ Forgot Password (send reset link)
-------------------------------------------------------------- */
+
+
+// --------------------- Forgot Password ---------------------
 module.exports.ForgotPassword = async (req, res) => {
   try {
     const { email } = req.body;
-
-    if (!email)
-      return res.json({ success: false, message: "Email is required" });
+    if (!email) return res.json({ success: false, message: "Email is required" });
 
     const user = await User.findOne({ email });
-    if (!user)
-      return res.json({ success: false, message: "User not found" });
+    if (!user) return res.json({ success: false, message: "User not found" });
 
-    // Generate token
+    // Generate reset token
     const resetToken = crypto.randomBytes(32).toString("hex");
-
-    // Hash token before storing
-    const hashedToken = crypto
-      .createHash("sha256")
-      .update(resetToken)
-      .digest("hex");
+    const hashedToken = crypto.createHash("sha256").update(resetToken).digest("hex");
 
     user.resetPasswordToken = hashedToken;
-    user.resetPasswordExpires = Date.now() + 15 * 60 * 1000; // 15 min
+    user.resetPasswordExpires = Date.now() + 15 * 60 * 1000; // 15 minutes
     await user.save();
 
     const resetLink = `http://localhost:3000/reset-password/${resetToken}`;
@@ -194,39 +186,28 @@ module.exports.ForgotPassword = async (req, res) => {
       from: `"Forest Fire Support" <${process.env.EMAIL}>`,
       to: user.email,
       subject: "Password Reset Request",
-      html: `
-    <h3>Password Reset</h3>
-    <p>Click the link below to reset your password:</p>
-    <a href="${resetLink}">${resetLink}</a>
-    <p>This link expires in 15 minutes.</p>
-  `,
+      html: `<p>Click below to reset your password (expires in 15 min):</p>
+             <a href="${resetLink}">${resetLink}</a>`,
     });
 
-
-    return res.json({
-      success: true,
-      message: "Password reset link sent to email",
-    });
+    return res.json({ success: true, message: "Password reset link sent to email" });
   } catch (error) {
-    console.error("Forgot password error:", error);
-    res.status(500).json({ success: false, message: "Server error" });
+    console.error(error);
+    return res.status(500).json({ success: false, message: "Server error" });
   }
 };
-/* -------------------------------------------------------------
-   ✅ Reset Password
-------------------------------------------------------------- */
+
+// --------------------- Reset Password ---------------------
 module.exports.ResetPassword = async (req, res) => {
   try {
     const { token } = req.params;
     const { password } = req.body;
 
-    if (!password)
-      return res.json({ success: false, message: "Password is required" });
+    if (!password) return res.json({ success: false, message: "Password is required" });
 
-    const hashedToken = crypto
-      .createHash("sha256")
-      .update(token)
-      .digest("hex");
+    console.log("Token from frontend:", token);
+    const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
+    console.log("Hashed token:", hashedToken);
 
     const user = await User.findOne({
       resetPasswordToken: hashedToken,
@@ -234,26 +215,17 @@ module.exports.ResetPassword = async (req, res) => {
     });
 
     if (!user)
-      return res.json({
-        success: false,
-        message: "Invalid or expired reset token",
-      });
+      return res.json({ success: false, message: "Invalid or expired reset token" });
 
     // Hash new password
     user.password = await bcrypt.hash(password, 10);
-
-    // Clear reset fields
     user.resetPasswordToken = undefined;
     user.resetPasswordExpires = undefined;
-
     await user.save();
 
-    return res.json({
-      success: true,
-      message: "Password reset successful",
-    });
+    return res.json({ success: true, message: "Password reset successful" });
   } catch (error) {
-    console.error("Reset password error:", error);
-    res.status(500).json({ success: false, message: "Server error" });
+    console.error(error);
+    return res.status(500).json({ success: false, message: "Server error" });
   }
 };

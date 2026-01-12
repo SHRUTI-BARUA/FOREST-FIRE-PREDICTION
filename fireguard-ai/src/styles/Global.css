@@ -1,0 +1,47 @@
+:root {
+    --primary-orange: #f97316;
+    --primary-red: #ef4444;
+    --primary-green: #22c55e;
+    --bg-gradient: linear-gradient(135deg, #f0fdf4 0%, #fff7ed 50%, #fefce8 100%);
+}
+
+body {
+    margin: 0;
+    font-family: 'Inter', sans-serif;
+    background: var(--bg-gradient);
+    color: #1f2937;
+    /* overflow-x: hidden; */
+}
+
+.btn-primary {
+    background: linear-gradient(to right, #ea580c, #dc2626, #f97316);
+    color: white;
+    border: 2px solid rgba(253, 224, 71, 0.5);
+    padding: 12px 24px;
+    border-radius: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 10px 15px -3px rgba(249, 115, 22, 0.4);
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 20px 25px -5px rgba(249, 115, 22, 0.5);
+}
+
+@keyframes pulse-soft {
+    0%,
+    100% {
+        opacity: 0.3;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 0.5;
+        transform: scale(1.05);
+    }
+}
+
+.animate-pulse-bg {
+    animation: pulse-soft 4s infinite ease-in-out;
+}
