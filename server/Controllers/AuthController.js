@@ -85,7 +85,9 @@ module.exports.Signup = async (req, res) => {
     });
 
     // 6️⃣ Create JWT token and set cookie
-    const token = createSecretToken(user._id);
+    //const token = createSecretToken(user._id);
+    const token = createSecretToken(user);
+
     res.cookie("token", token, { withCredentials: true, httpOnly: false });
 
     return res.status(201).json({
@@ -129,7 +131,9 @@ module.exports.Login = async (req, res) => {
       });
     }
 
-    const token = createSecretToken(user._id);
+    //const token = createSecretToken(user._id);
+    const token = createSecretToken(user);
+
 
     res.cookie("token", token, {
       httpOnly: true,
@@ -142,6 +146,7 @@ module.exports.Login = async (req, res) => {
       message: "User logged in successfully",
       success: true,
       user: user.username,
+      isVerified: user.isVerified,
     });
   } catch (error) {
     console.error("Login error:", error);

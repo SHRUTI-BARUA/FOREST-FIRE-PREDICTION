@@ -9,7 +9,8 @@ const {
 
 router.post('/signup', Signup);
 router.post('/login', Login);
-router.post('/', userVerification); 
+router.get('/verify', userVerification);
+
 router.post("/forgot-password", ForgotPassword);
 router.post("/reset-password/:token", ResetPassword);
 

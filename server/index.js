@@ -5,6 +5,9 @@ const app = express();
 require("dotenv").config();
 const cookieParser = require("cookie-parser");
 const authRoute = require("./Routes/AuthRoute");
+
+const fireRiskRoute = require("./Routes/FireRiskRoute");
+
 const { MONGO_URL, PORT } = process.env;
 
 // ✅ MongoDB connection
@@ -29,6 +32,7 @@ app.use(express.json());
 
 // ✅ Routes
 app.use("/", authRoute);
+app.use("/api", fireRiskRoute); 
 
 app.get("/", (req, res) => {
   res.send("🔥 Root route is working!!");
@@ -38,3 +42,4 @@ app.get("/", (req, res) => {
 app.listen(PORT || 4000, () => {
   console.log(`Server is listening on port ${PORT || 4000}`);
 });
+

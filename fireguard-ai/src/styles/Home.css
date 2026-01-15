@@ -1,46 +1,51 @@
-/* -------------------
-   GLOBAL STYLES
-------------------- */
+Home.css
+
 html {
     scroll-behavior: smooth;
-    height: 100%;
-    overflow-x: hidden;
+    /* REMOVE height: 100% - This is the main culprit */
+    height: auto !important;
+    overflow-y: scroll;
+    /* Forces the scrollbar to be active */
 }
 
 body {
     margin: 0;
     padding: 0;
     font-family: 'Arial', sans-serif;
-    height: 100%;
+    /* Use min-height so the page can expand and contract */
+    min-height: 100vh;
+    height: auto !important;
+    overflow-x: hidden;
+    position: relative;
 }
 
+
 /* -------------------
-   HOME CONTAINER
+    HOME CONTAINER
 ------------------- */
+
 .home-container {
     width: 100%;
     background: #f8fafc;
+    /* Ensure no overflow rule is blocking the scroll */
+    overflow: visible !important;
 }
 
-/* -------------------
-   HERO SECTION
-------------------- */
 .hero-full-viewport {
     position: relative;
     width: 100%;
-    min-height: 100vh; /* ensures full viewport */
+    height: 100vh;
+    /* Keep it 100vh to fill the screen */
     display: flex;
-    align-items: center;
+    flex-direction: column;
     justify-content: center;
+    /* THIS CENTERS THE BUTTON AND TEXT VERTICALLY */
+    align-items: center;
+    /* THIS CENTERS THEM HORIZONTALLY */
     background: #0f172a;
     overflow: hidden;
-display: flex;
-flex-direction: column;      /* stack content top-down */
-justify-content: flex-start; /* align to top instead of center */
-align-items: center;         /* keep horizontal centering */
-padding-top: 20px;           /* small space from top */
-
-
+    padding: 0;
+    /* Remove the top padding that was pushing it down */
 }
 
 .hero-bg-wrapper {
@@ -57,11 +62,13 @@ padding-top: 20px;           /* small space from top */
     height: 100%;
     object-fit: cover;
     animation: kenBurnsZoom 20s infinite alternate ease-in-out;
-    transform-origin: top center; /* zoom from top so upper part stays visible */
-
+    transform-origin: top center;
+    /* zoom from top so upper part stays visible */
 }
 
+
 /* Zoom animation */
+
 @keyframes kenBurnsZoom {
     0% {
         transform: scale(1);
@@ -71,7 +78,9 @@ padding-top: 20px;           /* small space from top */
     }
 }
 
+
 /* Dark overlay */
+
 .hero-overlay-dark {
     position: absolute;
     inset: 0;
@@ -79,16 +88,24 @@ padding-top: 20px;           /* small space from top */
     z-index: 2;
 }
 
+
 /* Content on top */
+
 .hero-content-layer {
     position: relative;
     z-index: 50;
     color: white;
     text-align: center;
-    padding: 0 20px; /* ensures text doesn’t overflow on small screens */
+    width: 100%;
+    /* Ensure it spans the width to center the text properly */
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 0 20px;
 }
 
+
 /* Hero title */
+
 .hero-display-title {
     font-size: clamp(2rem, 8vw, 4.2rem);
     font-weight: 900;
@@ -97,7 +114,9 @@ padding-top: 20px;           /* small space from top */
     margin: 0;
 }
 
+
 /* Glowing text colors */
+
 .text-fire-glow {
     color: #f97316;
 }
@@ -106,9 +125,11 @@ padding-top: 20px;           /* small space from top */
     color: #34d399;
 }
 
+
 /* -------------------
    BUTTON
 ------------------- */
+
 .btn-fire-pulse {
     padding: 15px 40px;
     background: linear-gradient(135deg, #f97316, #ef4444);
@@ -129,28 +150,39 @@ padding-top: 20px;           /* small space from top */
 }
 
 @keyframes pulse-glow-fire {
-    0% { box-shadow: 0 0 0 0 rgba(249, 115, 22, 0.7); }
-    70% { box-shadow: 0 0 0 20px rgba(249, 115, 22, 0); }
-    100% { box-shadow: 0 0 0 0 rgba(249, 115, 22, 0); }
+    0% {
+        box-shadow: 0 0 0 0 rgba(249, 115, 22, 0.7);
+    }
+    70% {
+        box-shadow: 0 0 0 20px rgba(249, 115, 22, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(249, 115, 22, 0);
+    }
 }
+
 
 /* -------------------
    BOTTOM CURVE
 ------------------- */
+
 .bottom-curve-divider {
     position: absolute;
     bottom: 0;
     left: 0;
     width: 100%;
-    height: 10vh; /* scales with screen height */
+    height: 10vh;
+    /* scales with screen height */
     background: #f8fafc;
     clip-path: ellipse(70% 100% at 50% 100%);
     z-index: 5;
 }
 
+
 /* -------------------
    FEATURES SECTION
 ------------------- */
+
 .features-compact-section {
     padding: 100px 5%;
     background: #f8fafc;
@@ -172,7 +204,9 @@ padding-top: 20px;           /* small space from top */
     margin: 0 auto;
 }
 
+
 /* Floating badges */
+
 .ai-badge-floating {
     background: rgba(255, 255, 255, 0.1);
     backdrop-filter: blur(5px);
@@ -183,22 +217,21 @@ padding-top: 20px;           /* small space from top */
     border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
+
 /* -------------------
    RESPONSIVE ADJUSTMENTS
 ------------------- */
+
 @media (max-width: 768px) {
     .hero-full-viewport {
         min-height: 80vh;
     }
-
     .hero-display-title {
         font-size: clamp(1.8rem, 10vw, 3rem);
     }
-
     .btn-fire-pulse {
         padding: 12px 30px;
     }
-
     .features-compact-section {
         padding: 70px 5%;
     }
@@ -208,16 +241,13 @@ padding-top: 20px;           /* small space from top */
     .hero-full-viewport {
         min-height: 70vh;
     }
-
     .hero-display-title {
         font-size: clamp(1.5rem, 12vw, 2.5rem);
     }
-
     .btn-fire-pulse {
         padding: 10px 25px;
         font-size: 1rem;
     }
-
     .features-compact-section {
         padding: 50px 5%;
     }
