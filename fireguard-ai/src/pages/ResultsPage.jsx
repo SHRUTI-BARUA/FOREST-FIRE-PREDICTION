@@ -22,7 +22,7 @@ export default function ResultsPage() {
   const lat = parseFloat(searchParams.get('lat'));
   const lo = parseFloat(searchParams.get('lo'));
   const targetProb = parseFloat(searchParams.get('value')) || 0;
-const targetProbPercent = targetProb * 100; // <-- convert to %
+  const targetProbPercent = targetProb * 100; // <-- convert to %
 
   //const targetProb = parseFloat(searchParams.get('value')) || 0;
   const fireRisk = (searchParams.get('risk') || 'LOW').toUpperCase(); // HIGH / LOW
@@ -36,6 +36,7 @@ const targetProbPercent = targetProb * 100; // <-- convert to %
   const strokeDashoffset = circumference - (displayProb / 100) * circumference;
 
   // Animate probability number
+  /*
   useEffect(() => {
   const timer = setTimeout(() => {
     setIsLoading(false);
@@ -57,6 +58,32 @@ const targetProbPercent = targetProb * 100; // <-- convert to %
   return () => clearTimeout(timer);
 }, [targetProbPercent]);
 
+*/
+  useEffect(() => {
+    let counter;
+
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+      let start = 0;
+      const duration = 1600;
+      const increment = targetProbPercent / (duration / 16);
+
+      counter = setInterval(() => {
+        start += increment;
+        if (start >= targetProbPercent) {
+          setDisplayProb(targetProbPercent);
+          clearInterval(counter);
+        } else {
+          setDisplayProb(start);
+        }
+      }, 16);
+    }, 500);
+
+    return () => {
+      clearTimeout(timer);
+      if (counter) clearInterval(counter);
+    };
+  }, [targetProbPercent]);
 
   if (!lat || !lo) return <div className="error-screen">Coordinates Missing</div>;
 
