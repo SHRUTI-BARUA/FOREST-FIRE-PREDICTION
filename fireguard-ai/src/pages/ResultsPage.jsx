@@ -35,30 +35,7 @@ export default function ResultsPage() {
   const circumference = 2 * Math.PI * radius;
   const strokeDashoffset = circumference - (displayProb / 100) * circumference;
 
-  // Animate probability number
-  /*
-  useEffect(() => {
-  const timer = setTimeout(() => {
-    setIsLoading(false);
-    let start = 0;
-    const duration = 1600;
-    const increment = targetProbPercent / (duration / 16);
-
-    const counter = setInterval(() => {
-      start += increment;
-      if (start >= targetProbPercent) {
-        setDisplayProb(targetProbPercent);
-        clearInterval(counter);
-      } else {
-        setDisplayProb(start);
-      }
-    }, 16);
-  }, 500);
-
-  return () => clearTimeout(timer);
-}, [targetProbPercent]);
-
-*/
+  
   useEffect(() => {
     let counter;
 

@@ -110,39 +110,7 @@ const isWithinOdisha = (lat, lo) => {
     ln <= ODISHA_BOUNDS.maxLo
   );
 };
-/*
-  // Analyze risk
-  const handleAnalyze = async () => {
-    if (!lat || !lo || !region) return;
 
-    try {
-      const response = await fetch('http://localhost:5000/predict', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          model: region,
-          latitude: parseFloat(lat),
-          longitude: parseFloat(lo),
-          temp_c: 30,
-          rh: 45,
-          wind_ms: 3,
-          rain_mm: 0,
-          NDVI: 0.7,
-          Elevation: 100,
-          Slope: 5,
-          day: new Date().getDate(),
-          month: new Date().getMonth() + 1,
-        }),
-      });
-
-      const data = await response.json();
-
-      // Navigate to ResultsPage with lat/lo
-      navigate(`/results?region=${region}&risk=${data.risk}&value=${data.fire_probability}&lat=${lat}&lo=${lo}`);
-    } catch (err) {
-      console.error('Prediction failed', err);
-    }
-  };*/
   const handleAnalyze = async () => {
   if (!lat || !lo) return;
 
