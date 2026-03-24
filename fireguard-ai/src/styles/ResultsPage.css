@@ -1,0 +1,235 @@
+/* 1. GLOBAL UI RESET */
+* {
+    box-sizing: border-box;
+    scrollbar-width: none;
+}
+
+*::-webkit-scrollbar {
+    display: none;
+}
+
+html, body {
+    margin: 0;
+    padding: 0;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    font-family: 'Inter', sans-serif;
+}
+
+/* 2. LAYOUT GRID */
+.page-layout {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    width: 100vw;
+}
+
+.content-container {
+    display: grid;
+    grid-template-columns: 380px 1fr;
+    gap: 20px;
+    padding: 20px;
+    flex: 1;
+    min-height: 0; /* Important to allow flex children to shrink */
+}
+
+/* Sidebar and Map Column */
+.sidebar-column, .map-column {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-height: 0;
+}
+
+/* 3. CARD BOX & ANALYSIS SECTION */
+.card-box {
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(20px);
+    border-radius: 35px;
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden;
+}
+
+.analysis-section {
+    padding: 20px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    align-items: center;
+    overflow-y: auto; /* Scroll if content exceeds */
+}
+
+/* 4. RADAR CIRCLE */
+.circle-container {
+    position: relative;
+    width: 180px;
+    height: 180px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 10px 0;
+}
+
+.svg-circle {
+    transform: rotate(-90deg);
+    width: 180px;
+    height: 180px;
+}
+
+.percentage-text-wrapper {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.outer-ring {
+    position: absolute;
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+}
+
+/* 5. RISK STATUS & BUTTON */
+.risk-status-box {
+    width: 100%;
+    padding: 15px;
+    border-radius: 18px;
+    font-weight: 800;
+    font-size: 1.1rem;
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+.risk-yes {
+    background: #ffebeb;
+    color: #ff3131;
+}
+
+.risk-no {
+    background: #e6ffe6;
+    color: #00b31f;
+}
+
+.btn-back {
+    width: 100%;
+    padding: 15px;
+    font-size: 0.9rem;
+    border: none;
+    border-radius: 18px;
+    cursor: pointer;
+    background-color: #ff5e00;
+    color: #fff;
+    font-weight: bold;
+    margin-top: 10px;
+}
+
+/* 6. MAP OUTPUT DISPLAY */
+.map-output-display {
+    flex: 1;
+    width: 100%;
+    border-radius: 40px;
+    overflow: hidden;
+    height: 100%;
+}
+
+.leaflet-full-height {
+    width: 100%;
+    height: 100%;
+}
+
+/* Loader */
+.loader-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.spinner {
+    width: 50px;
+    height: 50px;
+    border: 5px solid #f3f3f3;
+    border-top: 5px solid #ff5e00;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 10px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+/* RADAR CIRCLE CONTAINER */
+.circle-container {
+    position: relative;
+    width: 220px;      /* Match the SVG width */
+    height: 220px;     /* Match the SVG height */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 10px 0;
+}
+
+.svg-circle {
+    transform: rotate(-90deg);
+    width: 220px;
+    height: 220px;
+}
+
+.circle-bg,
+.circle-progress {
+    fill: none;
+    stroke-width: 15;
+    r: 85;   /* Same as radius in JS */
+    cx: 110; /* Half of SVG width */
+    cy: 110; /* Half of SVG height */
+}
+
+.circle-bg {
+    stroke: rgba(0, 0, 0, 0.1); /* Light grey background */
+}
+
+.circle-progress {
+    stroke-linecap: round;
+    transition: stroke-dashoffset 0.3s ease-out;
+}
+
+.percentage-text-wrapper {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.percentage-text-wrapper h1 {
+    margin: 0;
+    font-size: 2.2rem; /* Big number in center */
+    font-weight: 800;
+}
+
+.percentage-text-wrapper span {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: rgba(0,0,0,0.6);
+}
+
+/* Optional pulse for HIGH risk */
+.risk-pulse .outer-ring {
+    border: 4px solid rgba(255, 94, 0, 0.5);
+    animation: pulse 1.5s infinite;
+    width: 240px;
+    height: 240px;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); opacity: 0.6; }
+    50% { transform: scale(1.1); opacity: 0.3; }
+    100% { transform: scale(1); opacity: 0.6; }
+}

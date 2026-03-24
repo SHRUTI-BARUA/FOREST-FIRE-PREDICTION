@@ -1,0 +1,17 @@
+# Node
+node_modules/
+.env
+
+# Python / Flask
+__pycache__/
+instance/
+*.pyc
+venv/
+
+# React build
+build/
+dist/
+
+# System files
+.DS_Store
+*.log

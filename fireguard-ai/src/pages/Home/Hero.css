@@ -1,0 +1,261 @@
+/* HERO WRAPPER */
+.hero {
+  position: relative;
+  width: 100%;
+  min-height: 100vh;
+  overflow: hidden;
+  color:white;
+
+}
+.homepage-wrapper {
+  background-color: #051818;
+  min-height: 100vh;
+  width: 100%;
+}
+
+
+/* SLIDER WRAPPER */
+.slider {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.slide {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  /* Change 1: Center se hata kar flex-start karo */
+  align-items: flex-start; 
+  
+  /* Change 2: Yahan se content ko niche push karo */
+  padding-top: 150px; 
+  
+  justify-content: space-between;
+  padding-left: 8%;
+  padding-right: 8%;
+  box-sizing: border-box;
+  opacity: 0;
+  transition: opacity 1s ease-in-out;
+}
+.slide.active {
+  opacity: 1;
+  z-index: 2;
+}
+
+/* BLURRED BACKGROUND */
+.slide-bg {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  filter: blur(30px) brightness(55%);
+  transform: scale(1.2);
+  z-index: 0;
+}
+
+/* TEXT + IMAGE ABOVE BACKGROUND */
+.slide-left,
+.slide-right {
+  position: relative;
+  z-index: 2;
+}
+
+/* LEFT SIDE */
+.slide-left {
+  flex: 1;
+  max-width: 600px;
+}
+
+/* RIGHT SIDE */
+.slide-right {
+  flex: 1;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.slide-right img {
+  max-height: 75vh;
+  width: auto;
+  border-radius: 16px;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+  object-fit: contain;
+}
+
+/* RESPONSIVE */
+@media (max-width: 900px) {
+  .slide {
+    flex-direction: column;
+    text-align: center;
+    justify-content: center;
+  }
+
+  .slide-right {
+    justify-content: center;
+    margin-top: 40px;
+  }
+
+  .slide-right img {
+    max-height: 60vh;
+  }
+}
+
+/* Container for the new section */
+.product-portfolio {
+  background-color: #061a1a; /* The dark forest/midnight green color */
+  color: #ffffff;
+  padding: 80px 10%;
+  font-family: 'Inter', sans-serif; /* Or your preferred clean font */
+}
+
+.portfolio-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 50px;
+  margin-bottom: 60px;
+}
+
+.header-left {
+  flex: 1;
+}
+
+.header-left .subtitle {
+  color: #ff5a36; /* The orange accent color */
+  text-transform: uppercase;
+  font-weight: bold;
+  font-size: 14px;
+  display: block;
+  margin-bottom: 15px;
+}
+
+.header-left h2 {
+  font-size: 48px;
+  font-weight: 800;
+  line-height: 1.1;
+  margin: 0;
+}
+
+.header-right {
+  flex: 1;
+}
+
+.header-right p {
+  font-size: 18px;
+  line-height: 1.6;
+  color: #b0bcbc; /* Slightly dimmed text for readability */
+}
+
+/* Product Cards Styling */
+.portfolio-grid {
+  display: flex;
+  gap: 10px;
+}
+
+.product-card {
+  background: rgba(255, 255, 255, 0.05); /* Subtle dark glass effect */
+  padding: 20px;
+  border-radius: 12px;
+  flex: 1;
+  transition: transform 0.3s ease;
+}
+
+.product-card:hover {
+  transform: translateY(-5px);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.product-card h3 {
+  font-size: 28px;
+  margin-bottom: 20px;
+}
+
+.product-card p {
+  color: #b0bcbc;
+  line-height: 1.5;
+}
+
+/* Responsive adjustments */
+@media (max-width: 900px) {
+  .portfolio-header, .portfolio-grid {
+    flex-direction: column;
+  }
+}
+
+.btn-primary {
+  padding: 20px 55px;        /* bigger button */
+  font-size: 1.15rem;        /* bigger text */
+  font-weight: 800;
+  border-radius: 60px;
+}
+
+/* move button slightly right */
+.hero-buttons {
+  margin-left: 25px;
+}
+
+
+
+
+/* Popup Overlay */
+.auth-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.85);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 99999; /* Higher than Navbar and Slider */
+}
+
+/* Modal Box */
+.auth-modal {
+  background: #1a1a1a;
+  padding: 40px;
+  border-radius: 16px;
+  text-align: center;
+  width: 350px;
+  border: 1px solid #333;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+.auth-modal h3 {
+  color: white;
+  margin-bottom: 10px;
+}
+
+.auth-btn {
+  width: 100%;
+  padding: 12px;
+  margin-bottom: 12px;
+  border-radius: 8px;
+  border: none;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.login-btn { background: #ff4d4d; color: white; }
+.signup-btn { background: white; color: black; }
+.guest-btn { background: #444; color: white; }
+
+.auth-btn:hover { opacity: 0.9; transform: translateY(-2px); }
+
+.divider {
+  color: #666;
+  margin: 10px 0;
+  font-size: 12px;
+}
+
+.cancel-link {
+  background: none;
+  border: none;
+  color: #888;
+  margin-top: 15px;
+  cursor: pointer;
+}
+
+.cancel-link:hover { color: #ff4d4d; }

@@ -1,0 +1,204 @@
+/* Base Layout */
+.helpline-page-root {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+  font-family: 'Inter', sans-serif;
+  background-color: #f8fafc;
+}
+
+.helpline-scroll-container {
+  flex: 1;
+  overflow-y: auto;
+  scroll-behavior: smooth;
+}
+
+/* Header Banner */
+.helpline-header-banner {
+  width: 100%;
+  background: linear-gradient(rgba(13, 39, 21, 0.85), rgba(0, 0, 0, 0.8)), 
+              url('https://images.unsplash.com/photo-1448375240586-882707db888b?auto=format&fit=crop&w=1200');
+  background-size: cover;
+  background-position: center;
+  padding: 100px 0 70px 0;
+  text-align: center;
+  color: white;
+  border-bottom: 5px solid #ffb703;
+}
+
+.gov-tag {
+  background: #ffb703;
+  color: #000;
+  padding: 4px 12px;
+  font-weight: 800;
+  font-size: 0.7rem;
+  border-radius: 4px;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+  display: inline-block;
+}
+
+/* Content Wrapper */
+.content-wrapper {
+  max-width: 1300px;
+  margin: 0 auto;
+  padding: 40px 20px;
+}
+
+.info-section {
+  padding: 40px 0;
+}
+
+.section-main-title {
+  color: #1b4332;
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 30px;
+  border-left: 5px solid #1b4332;
+  padding-left: 15px;
+}
+
+/* 8 Emergency Cards Grid (4 per row) */
+.contact-grid-compact {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 15px;
+}
+
+.contact-card-small {
+  padding: 22px 12px;
+  border-radius: 12px;
+  text-align: center;
+  color: white;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+.contact-card-small:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+}
+
+/* Card Colors */
+.color-fire { background: #d90429; }
+.color-medical { background: #0077b6; }
+.color-police { background: #334155; }
+.color-forest { background: #1b4332; }
+.color-national { background: #6d28d9; }
+.color-disaster { background: #ea580c; }
+.color-women { background: #be185d; }
+.color-child { background: #0369a1; }
+
+.card-icon-small { font-size: 1.8rem; margin-bottom: 8px; }
+.contact-card-small h4 { font-size: 0.9rem; margin-bottom: 5px; opacity: 0.9; }
+.phone-num-small { font-size: 1.15rem; font-weight: 800; margin-bottom: 12px; }
+
+.call-btn-small {
+  display: inline-block;
+  background: #fff;
+  color: #333;
+  padding: 5px 12px;
+  border-radius: 4px;
+  text-decoration: none;
+  font-weight: bold;
+  font-size: 0.75rem;
+}
+
+/* Protocol Section Grid */
+.glass-box {
+  background: white;
+  padding: 40px;
+  border-radius: 16px;
+  border: 1px solid #e2e8f0;
+}
+
+.protocol-flex {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+.step-card {
+  background: #ffffff;
+  padding: 20px;
+  border-radius: 12px;
+  text-align: center;
+  border: 1px solid #edf2f7;
+  border-top: 4px solid #1b4332; 
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+.protocol-status-tag {
+  font-size: 0.6rem;
+  font-weight: 800;
+  color: #1b4332;
+  background: #e6fcf5;
+  padding: 3px 8px;
+  border-radius: 20px;
+  margin-bottom: 10px;
+  display: inline-block;
+}
+
+.step-card h4 { font-size: 0.95rem; margin-bottom: 8px; color: #1b4332; }
+.step-card p { font-size: 0.85rem; color: #4a5568; line-height: 1.4; }
+
+/* Schemes Layout */
+.schemes-layout {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+.official-scheme-card {
+  background: white;
+  padding: 25px;
+  border-radius: 8px;
+  border-top: 5px solid #1b4332;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.scheme-btn {
+  display: inline-block;
+  margin-top: 15px;
+  padding: 10px 18px;
+  border-radius: 6px;
+  background-color: #1b4332; 
+  color: white !important;
+  font-weight: 700;
+  font-size: 0.85rem;
+  text-decoration: none;
+  width: fit-content;
+}
+
+.badge {
+  background: #e2e8f0;
+  padding: 3px 8px;
+  font-size: 0.65rem;
+  font-weight: bold;
+  border-radius: 3px;
+}
+
+/* Footer */
+.gov-footer {
+  background: #0f172a;
+  color: #94a3b8;
+  text-align: center;
+  padding: 40px 0;
+}
+
+/* Responsive Scaling */
+@media (max-width: 1100px) {
+  .contact-grid-compact, .protocol-flex {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 650px) {
+  .contact-grid-compact, .protocol-flex {
+    grid-template-columns: 1fr;
+  }
+}
