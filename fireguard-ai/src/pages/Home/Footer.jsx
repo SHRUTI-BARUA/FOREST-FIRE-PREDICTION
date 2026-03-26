@@ -7,7 +7,7 @@ const Footer = () => {
       <div className="footer-container">
         <div className="footer-top">
           <div className="footer-brand">
-            <h2 className="footer-logo">🔥 ForestGuard</h2>
+            <h2 className="footer-logo">ForestGuard</h2>
             <p className="footer-tagline">
               Leading the way in AI-driven wildfire intelligence and 
               ecosystem protection.

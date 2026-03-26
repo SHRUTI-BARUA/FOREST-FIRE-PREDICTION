@@ -1,399 +1,380 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import { useSearchParams, useNavigate, useLocation } from "react-router-dom";
 import {
     MapContainer,
     TileLayer,
     Marker,
-    Circle,
-    LayersControl,
+    Popup,
+    useMap,
 } from "react-leaflet";
-import L from "leaflet";
+import Draggable from "react-draggable";
 import Navbar from "../components/Navbar";
+import L from "leaflet";
+import "leaflet.heat";
 import "leaflet/dist/leaflet.css";
 import "../styles/ResultsPage.css";
 
-import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png";
-import markerIcon from "leaflet/dist/images/marker-icon.png";
-import markerShadow from "leaflet/dist/images/marker-shadow.png";
+// --- Leaflet Icon Fix ---
+import icon from "leaflet/dist/images/marker-icon.png";
+import iconShadow from "leaflet/dist/images/marker-shadow.png";
 
-delete L.Icon.Default.prototype._getIconUrl;
-
-L.Icon.Default.mergeOptions({
-    iconRetinaUrl: markerIcon2x,
-    iconUrl: markerIcon,
-    shadowUrl: markerShadow,
+let DefaultIcon = L.icon({
+    iconUrl: icon,
+    shadowUrl: iconShadow,
+    iconSize: [25, 41],
+    iconAnchor: [12, 41],
 });
+L.Marker.prototype.options.icon = DefaultIcon;
+
+// --- Sub-Component: Heatmap Layer ---
+// --- Sub-Component: Heatmap Layer ---
+function HeatmapLayer({ data, riskLevel, isSimulation }) {
+    const map = useMap();
+    const layerRef = useRef(null);
+
+    useEffect(() => {
+        // 1. Remove previous layer strictly
+        if (layerRef.current) {
+            map.removeLayer(layerRef.current);
+            layerRef.current = null;
+        }
+
+        if (data && data.length > 0) {
+            // DEFINE GRADIENTS
+            const fireGradient = { 0.3: "#00ff41", 0.6: "#ffc107", 0.9: "#ff3131" }; // Green -> Yellow -> Red
+            const yellowGradient = { 0.0: "#ffc107", 1.0: "#ffc107" }; // Pure Yellow for Moderate
+            const greenGradient = { 0.0: "#00ff41", 1.0: "#00ff41" };  // Pure Green for Low
+            const simulationGradient = { 0.4: "#ffeb3b", 0.7: "#ff9800", 1.0: "#f44336" }; // Burning Fire: Yellow -> Orange -> Red
+            
+            let activeGradient = fireGradient;
+            if (isSimulation) {
+                activeGradient = simulationGradient;
+            } else {
+                if (riskLevel === "LOW") {
+                    activeGradient = greenGradient;
+                } else if (riskLevel === "MODERATE" || riskLevel === "MEDIUM") {
+                    activeGradient = yellowGradient;
+                } else {
+                    activeGradient = fireGradient; // Stays Green->Yellow->Red for High
+                }
+            }
+
+            const points = data.map((p) => [p.lat, p.lon, p.risk || p.intensity || 1.0]);
+
+            layerRef.current = L.heatLayer(points, {
+                radius: 25,
+                blur: 15,
+                maxZoom: 10,
+                gradient: activeGradient,
+            }).addTo(map);
+        }
+
+        return () => {
+            if (layerRef.current) map.removeLayer(layerRef.current);
+        };
+    }, [data, map, riskLevel, isSimulation]); 
+
+    return null;
+}
+
+// --- Sub-Component: Recenter Map ---
+function RecenterButton({ lat, lo }) {
+    const map = useMap();
+    return (
+        <button className="recenter-tool" onClick={() => map.flyTo([lat, lo], 12)}>
+            🎯
+        </button>
+    );
+}
 
 export default function ResultsPage() {
     const navigate = useNavigate();
     const location = useLocation();
     const [searchParams] = useSearchParams();
 
-    /* --------------------------
-       AUTH DETECTION (fixed)
-    --------------------------- */
-    /* --------------------------
-     AUTH DETECTION (Synced with Backend)
- --------------------------- */
-    const [isLoggedIn, setIsLoggedIn] = useState(false);
-    const [isLoadingAuth, setIsLoadingAuth] = useState(true);
+    const initialFeatures = location.state?.features;
 
+    // State for Prediction & Grid
+    const [prediction, setPrediction] = useState(initialFeatures || null);
+    const [heatmapData, setHeatmapData] = useState([]);
+    const [fullTimeseries, setFullTimeseries] = useState([]);
+
+    // State for Animation
+    const [currentStep, setCurrentStep] = useState(0);
+    const [isAnimating, setIsAnimating] = useState(false);
+    const [displayProb, setDisplayProb] = useState(0);
+    const [loading, setLoading] = useState(!initialFeatures);
+    const [isSimulating, setIsSimulating] = useState(false); // 🔥 For the radar popup
+
+    const nodeRefCard = useRef(null);
+    const nodeRefHud = useRef(null);
+
+    const lat = parseFloat(searchParams.get("lat")) || 20.2961;
+    const lo = parseFloat(searchParams.get("lo")) || 84.8245;
+
+    const fireRisk = (prediction?.risk || searchParams.get("risk") || "LOW").toUpperCase();
+
+    // 1. Unified Data Fetch (Single Point Only)
     useEffect(() => {
-        const checkUser = async () => {
+        const fetchAllData = async () => {
+            if (!prediction) setLoading(true);
             try {
-                const res = await fetch("http://localhost:4000/check-auth", {
-                    method: "GET",
-                    credentials: "include", // Essential for cookies/sessions
-                });
-                const data = await res.json();
-                setIsLoggedIn(!!data.status);
+                // Fetch Single Point Prediction if not available
+                let predData = prediction;
+                if (!predData) {
+                    const predRes = await fetch("http://localhost:5000/predict", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ latitude: lat, longitude: lo }),
+                    });
+                    predData = await predRes.json();
+                    setPrediction(predData);
+                }
             } catch (err) {
-                setIsLoggedIn(false);
+                console.error("Fetch Error:", err);
             } finally {
-                setIsLoadingAuth(false);
+                setLoading(false);
             }
         };
-        checkUser();
-    }, []);
+        fetchAllData();
+    }, [lat, lo]);
 
+    // 🔥 Trigger Prediction Simulation Logic
+    const handlePredictSpread = async () => {
+        if (fullTimeseries.length > 0) {
+            setIsAnimating(!isAnimating);
+            return;
+        }
 
-    const isGuest = !isLoggedIn;
-
-    const [showPopup, setShowPopup] = useState(false);
-    const [hasSaved, setHasSaved] = useState(false);
-
-    /* --------------------------
-       URL PARAMETERS
-    --------------------------- */
-    const lat = parseFloat(searchParams.get("lat"));
-    const lo = parseFloat(searchParams.get("lo"));
-    const targetProb = parseFloat(searchParams.get("value")) || 0;
-    const targetProbPercent = targetProb * 100;
-    const fireRisk = (searchParams.get("risk") || "LOW").toUpperCase();
-
-    const [isLoading, setIsLoading] = useState(true);
-    const [displayProb, setDisplayProb] = useState(0);
-
-    /* --------------------------
-       SAVE PREDICTION FUNCTION
-    --------------------------- */
-    const savePrediction = async () => {
+        setIsSimulating(true);
         try {
-            const response = await fetch("http://localhost:4000/api/predict-fire", {
+            const gridRes = await fetch("http://localhost:5000/predict-grid", {
                 method: "POST",
-                credentials: "include",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                    latitude: lat,
-                    longitude: lo,
-                    isGuest: false,
-                }),
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ latitude: lat, longitude: lo }),
             });
-
-            if (!response.ok) {
-                throw new Error("Failed to save prediction");
+            const gridData = await gridRes.json();
+            
+            if (gridData.status === "success") {
+                setFullTimeseries(gridData.timeseries);
+                setHeatmapData(gridData.initial);
+                setIsAnimating(true);
             }
-
-            console.log("Prediction + Save successful");
-        } catch (error) {
-            console.error("Error:", error);
+        } catch (err) {
+            console.error("Grid Fetch Error:", err);
+        } finally {
+            setIsSimulating(false);
         }
     };
 
-    /* --------------------------
-       ANIMATION + AUTO SAVE
-    --------------------------- */
-    
+    // 2. Spread Animation Logic
     useEffect(() => {
-    // 🔴 ADD THIS LINE: Wait for the auth check to finish
-    if (isLoadingAuth) return; 
-
-    let counter;
-    const timer = setTimeout(() => {
-        setIsLoading(false);
-
-        // Now we are sure if they are a guest or not
-        if (isGuest) {
-            setShowPopup(true);
+        let interval = null;
+        if (isAnimating && fullTimeseries.length > 0) {
+            interval = setInterval(() => {
+                setCurrentStep((prev) => {
+                    const next = prev + 1;
+                    if (next >= fullTimeseries.length) {
+                        setIsAnimating(false); // Stop when complete
+                        return prev; // Stay at last step
+                    }
+                    return next;
+                });
+            }, 500); // 500ms per hour for smoother motion
         }
+        return () => clearInterval(interval);
+    }, [isAnimating, fullTimeseries, fireRisk]);
 
+    // 3. Update Heatmap when step changes
+    useEffect(() => {
+        if (fullTimeseries[currentStep]) {
+            setHeatmapData(fullTimeseries[currentStep].data);
+        }
+    }, [currentStep, fullTimeseries]);
+
+    // 4. Score Counter Animation
+    useEffect(() => {
+        if (!prediction) return;
         let start = 0;
-        const duration = 1600;
-        const increment = targetProbPercent / (duration / 16);
-
-        counter = setInterval(() => {
-            start += increment;
-            if (start >= targetProbPercent) {
-                setDisplayProb(targetProbPercent);
+        const target = Math.floor(prediction.fire_probability * 100);
+        const counter = setInterval(() => {
+            if (start >= target) {
+                setDisplayProb(target);
                 clearInterval(counter);
-
-                // This will now correctly trigger because isLoggedIn is accurate
-                if (isLoggedIn && !hasSaved) {
-                    savePrediction();
-                    setHasSaved(true);
-                }
             } else {
+                start += 1;
                 setDisplayProb(start);
             }
-        }, 16);
-    }, 500);
+        }, 20);
+        return () => clearInterval(counter);
+    }, [prediction]);
 
-    return () => {
-        clearTimeout(timer);
-        if (counter) clearInterval(counter);
-    };
-    // 🔴 UPDATE dependencies to include isLoadingAuth
-}, [isLoadingAuth, targetProbPercent, isGuest, isLoggedIn, hasSaved]);
+    const safetyInfo = useMemo(() => {
+        if (heatmapData.length === 0 || !prediction) return { dist: "..." };
 
-    /* --------------------------
-       MAP CIRCLE CALCULATIONS
-    --------------------------- */
-    const radius = 85;
-    const circumference = 2 * Math.PI * radius;
-    const strokeDashoffset =
-        circumference - (displayProb / 100) * circumference;
+        // If the current prediction is already LOW risk, distance is 0
+        if (prediction.risk.toUpperCase() === "LOW") {
+            return { dist: "0.00" };
+        }
 
-    if (!lat || !lo)
-        return <div className="error-screen">Coordinates Missing</div>;
+        const getDist = (lat1, lon1, lat2, lon2) => {
+            const R = 6371;
+            const dLat = ((lat2 - lat1) * Math.PI) / 180;
+            const dLon = ((lon2 - lon1) * Math.PI) / 180;
+            const a = Math.sin(dLat / 2) ** 2 + 
+                      Math.cos((lat1 * Math.PI) / 180) * Math.cos((lat2 * Math.PI) / 180) * Math.sin(dLon / 2) ** 2;
+            return R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)));
+        };
+
+        // Find the point in the grid with the lowest risk
+        const safest = heatmapData.reduce((prev, curr) => curr.risk < prev.risk ? curr : prev);
+        return { dist: getDist(lat, lo, safest.lat, safest.lon).toFixed(2) };
+    }, [heatmapData, lat, lo, prediction]);
+
 
     return (
-        <div className="page-layout">
-            <Navbar />
-
-            <div className="content-container">
-                {/* Sidebar */}
-                <aside className="sidebar-column">
-                    <div className="card-box">
-                        <div className="card-orange-header">
-                            <h2>SATELLITE AUDIT</h2>
-                        </div>
-
-                        <div className="analysis-section">
-                            {isLoading ? (
-                                <div className="loader-container">
-                                    <div className="spinner"></div>
-                                    <p>ANALYZING THERMAL FEED...</p>
-                                </div>
-                            ) : (
-                                <>
-                                    <div className="result-item">
-                                        <label className="sidebar-label">
-                                            Risk Probability
-                                        </label>
-
-                                        <div
-                                            className={`circle-container ${fireRisk === "HIGH" ? "risk-pulse" : ""
-                                                }`}
-                                        >
-                                            <div className="outer-ring"></div>
-
-                                            <svg width="220" height="220">
-                                                <circle
-                                                    className="circle-bg"
-                                                    cx="110"
-                                                    cy="110"
-                                                    r={radius}
-                                                />
-                                                <circle
-                                                    className="circle-progress"
-                                                    cx="110"
-                                                    cy="110"
-                                                    r={radius}
-                                                    style={{
-                                                        strokeDasharray: circumference,
-                                                        strokeDashoffset: strokeDashoffset,
-                                                        stroke:
-                                                            fireRisk === "HIGH"
-                                                                ? "#ff3131"
-                                                                : fireRisk === "MODERATE"
-                                                                    ? "#ffc107"
-                                                                    : "#00ff41",
-                                                    }}
-                                                />
-                                            </svg>
-
-                                            <div className="percentage-text-wrapper">
-                                                <h1>{displayProb.toFixed(1)}%</h1>
-                                                <span>POTENTIAL</span>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div
-                                        className={`risk-status-box ${fireRisk === "HIGH"
-                                                ? "risk-yes"
-                                                : fireRisk === "MODERATE"
-                                                    ? "risk-mid"
-                                                    : "risk-no"
-                                            }`}
-                                    >
-                                        {fireRisk === "HIGH"
-                                            ? "🔥 HIGH RISK"
-                                            : fireRisk === "MODERATE"
-                                                ? "⚠️ MODERATE RISK"
-                                                : "✅ LOW RISK"}
-                                    </div>
-
-                                    {fireRisk === "HIGH" &&
-                                        targetProbPercent > 70 && (
-                                            <div className="emergency-alert-box">
-                                                <h3>🚨 IMMEDIATE ACTION REQUIRED</h3>
-                                                <p>
-                                                    Fire probability is extremely high in
-                                                    this region. Please contact emergency
-                                                    services immediately.
-                                                </p>
-
-                                                <button
-                                                    className="btn-helpline"
-                                                    onClick={() =>
-                                                        navigate("/helpline")
-                                                    }
-                                                >
-                                                    🚒 Go To Emergency Helpline
-                                                </button>
-                                            </div>
-                                        )}
-
-                                    <button
-                                        className="btn-back"
-                                        onClick={() => navigate("/input")}
-                                    >
-                                        NEW ANALYSIS
-                                    </button>
-                                </>
-                            )}
+        <div className="dashboard-wrapper">
+            {/* 🔥 HIGH-TECH COMMAND CENTER OVERLAY */}
+            {isSimulating && (
+                <div className="loading-doodle-overlay">
+                    <div className="hud-scanner-container">
+                        <div className="hex-grid"></div>
+                        <div className="scanning-line"></div>
+                        <div className="radar-circle">
+                            <div className="scanning-beam"></div>
+                            <div className="marker-pings">
+                                <span className="ping p1"></span>
+                                <span className="ping p2"></span>
+                                <span className="ping p3"></span>
+                            </div>
                         </div>
                     </div>
-                </aside>
+                    
+                    <div className="analysis-console">
+                        <header className="console-header">
+                            <span className="console-title">SPATIAL RISK ANALYSIS</span>
+                            <div className="console-dots"><span></span><span></span><span></span></div>
+                        </header>
+                        <div className="console-logs">
+                            <p className="log-line">INITIATING GEOSPATIAL SCAN...</p>
+                            <p className="log-line delay-1">FETCHING WIND VECTORS: [{prediction?.features?.wind_speed || 2.4} m/s]</p>
+                            <p className="log-line delay-2">NDVI GRADIENT MAPPING: [0.65 - 0.82]</p>
+                            <p className="log-line delay-3">TERRAIN SLOPE CALCULATION: [{prediction?.features?.slope || 15}°]</p>
+                            <p className="log-line delay-4 highlight">RESOLVING FIRE SPREAD MODELS...</p>
+                        </div>
+                    </div>
 
-                {/* Map */}
-                <main className="map-column">
-                    <MapContainer
-                        center={[lat, lo]}
-                        zoom={14}
-                        className="leaflet-full-height"
-                        zoomControl={false}
-                    >
-                        <LayersControl position="topright">
-                            <LayersControl.BaseLayer
-                                checked
-                                name="Satellite Imagery"
-                            >
-                                <TileLayer url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}" />
-                            </LayersControl.BaseLayer>
+                    <div className="coordinate-tracker">
+                        <div className="coord-item"><span>LAT:</span> {lat.toFixed(6)}</div>
+                        <div className="coord-item"><span>LON:</span> {lo.toFixed(6)}</div>
+                    </div>
 
-                            <LayersControl.BaseLayer name="Street Map">
-                                <TileLayer url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png" />
-                            </LayersControl.BaseLayer>
-                        </LayersControl>
-
-                        <Marker position={[lat, lo]} />
-
-                        <Circle
-                            center={[lat, lo]}
-                            radius={2000}
-                            pathOptions={{
-                                color:
-                                    fireRisk === "HIGH"
-                                        ? "#ff3131"
-                                        : fireRisk === "MODERATE"
-                                            ? "#ffc107"
-                                            : "#00ff41",
-
-                                fillColor:
-                                    fireRisk === "HIGH"
-                                        ? "#ff3131"
-                                        : fireRisk === "MODERATE"
-                                            ? "#ffc107"
-                                            : "#00ff41",
-
-                                fillOpacity: 0.35,
-                                weight: 3,
-                                dashArray:
-                                    fireRisk === "HIGH"
-                                        ? "10, 15"
-                                        : "0",
-                            }}
-                        />
-                    </MapContainer>
-                </main>
-            </div>
-
-            {/* Guest Popup */}
-            {showPopup && (
-                <div style={overlayStyle}>
-                    <div style={popupStyle}>
-                        <h3>Save This Prediction?</h3>
-                        <p>
-                            You are using Guest Mode. Login to save this
-                            result.
-                        </p>
-
-                        <div style={{ display: "flex", gap: "15px" }}>
-                            <button
-                                style={loginBtnStyle}
-                                onClick={() => navigate("/login")}
-                            >
-                                Login
-                            </button>
-
-                            <button
-                                style={cancelBtnStyle}
-                                onClick={() => setShowPopup(false)}
-                            >
-                                Continue as Guest
-                            </button>
+                    <div className="progress-status-container">
+                        <h2 className="loading-text">GENERATING FORECAST</h2>
+                        <div className="progress-bar-mini">
+                            <div className="progress-fill shadow-green"></div>
                         </div>
                     </div>
                 </div>
             )}
+
+            <div className="nav-container-fixed">
+                <Navbar />
+            </div>
+
+            <div className="main-viewport">
+                {/* HUD: Safe Zone */}
+                <Draggable nodeRef={nodeRefHud} bounds="parent">
+                    <div className="top-safe-hud draggable-element" ref={nodeRefHud}>
+                        <div className="hud-content">
+                            <span className="hud-dot"></span>
+                            <span className="hud-label">NEAREST SAFE ZONE:</span>
+                            <span className="hud-value">{safetyInfo.dist}</span>
+                            <span className="hud-unit">KM</span>
+                        </div>
+                    </div>
+                </Draggable>
+
+                {/* TIME CONTROLLER (New) */}
+                <div className="time-controls-overlay">
+                    <div className="glass-panel-control">
+                        <button className="play-btn" onClick={handlePredictSpread}>
+                            {isAnimating ? "⏸ PAUSE SIM" : "▶ PREDICT SPREAD"}
+                        </button>
+                        <div className="step-info">
+                            <span>FORECAST: T + {currentStep}h</span>
+                            <input
+                                type="range" min="0" max={fullTimeseries.length - 1}
+                                value={currentStep} onChange={(e) => { setIsAnimating(false); setCurrentStep(parseInt(e.target.value)); }}
+                            />
+                        </div>
+                    </div>
+                </div>
+
+                <MapContainer center={[lat, lo]} zoom={10} className="full-screen-map" zoomControl={false}>
+                    <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+
+                    {/* Pass the risk status here */}
+                    {heatmapData.length > 0 && (
+                        <HeatmapLayer
+                            data={heatmapData}
+                            riskLevel={fireRisk}
+                            isSimulation={currentStep > 0}
+                        />
+                    )}
+
+                    <Marker position={[lat, lo]}>
+                        <Popup><b>Analysis Point</b><br />Risk: {fireRisk}</Popup>
+                    </Marker>
+                </MapContainer>
+
+                {/* Sidebar: Satellite Audit */}
+                <Draggable nodeRef={nodeRefCard} handle=".drag-handle" bounds="parent">
+                    <div className="floating-sidebar draggable-element" ref={nodeRefCard}>
+                        <div className="audit-card">
+                            <header className="audit-header drag-handle">
+                                <span className="live-dot"></span>
+                                <h3>SATELLITE AUDIT</h3>
+                            </header>
+                            <div className="audit-content">
+                                <div className="prob-circle-zone">
+                                    <svg width="180" height="180" className="radial-svg">
+                                        <circle className="r-bg" cx="90" cy="90" r={70} />
+                                        <circle className="r-progress" cx="90" cy="90" r={70}
+                                            style={{
+                                                strokeDasharray: 440,
+                                                strokeDashoffset: 440 - (displayProb / 100) * 440,
+                                                stroke: fireRisk === "HIGH" ? "#f10505" : fireRisk === "MODERATE" ? "#ffc107" : "#00ff41",
+                                            }}
+                                        />
+                                    </svg>
+                                    <div className="prob-label-wrap">
+                                        <h1 className="prob-val">{displayProb}%</h1>
+                                        <span className="prob-sub">PROBABILITY</span>
+                                    </div>
+                                </div>
+                                <div className={`risk-badge-flat ${fireRisk.toLowerCase()}`}>{fireRisk} RISK DETECTED</div>
+                                <div className="metrics-grid">
+                                    <div className="metric-box"><span className="m-title">LATITUDE</span><span className="m-val">{lat.toFixed(4)}°</span></div>
+                                    <div className="metric-box"><span className="m-title">LONGITUDE</span><span className="m-val">{lo.toFixed(4)}°</span></div>
+                                    <div className="metric-box"><span className="m-title">TEMP</span><span className="m-val">{prediction?.features?.temp_c?.toFixed(1) || "--"}°C</span></div>
+                                    <div className="metric-box"><span className="m-title">HUMID</span><span className="m-val">{prediction?.features?.RH?.toFixed(0) || "--"}%</span></div>
+                                </div>
+                                <button className="btn-action-primary" onClick={() => navigate("/input")}>NEW ANALYSIS</button>
+                                {fireRisk === "HIGH" && (
+                                    <button className="btn-helpline-alert" onClick={() => navigate("/helpline")}>🆘 EMERGENCY HELPLINE</button>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                </Draggable>
+
+                <div className="floating-legend">
+                    <div className="leg-item"><span className="dot low"></span> Low</div>
+                    <div className="leg-item"><span className="dot mid"></span> Moderate</div>
+                    <div className="leg-item"><span className="dot high"></span> High</div>
+                </div>
+            </div>
         </div>
     );
 }
-
-/* --------------------------
-   STYLES
---------------------------- */
-
-const overlayStyle = {
-    position: "fixed",
-    top: 0,
-    left: 0,
-    width: "100%",
-    height: "100%",
-    background: "rgba(0,0,0,0.6)",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    zIndex: 9999,
-};
-
-const popupStyle = {
-    background: "#1f2937",
-    padding: "25px",
-    borderRadius: "12px",
-    textAlign: "center",
-    color: "#fff",
-    width: "350px",
-};
-
-const loginBtnStyle = {
-    background: "#f97316",
-    border: "none",
-    padding: "8px 18px",
-    borderRadius: "6px",
-    cursor: "pointer",
-    color: "#fff",
-};
-
-const cancelBtnStyle = {
-    background: "#374151",
-    border: "1px solid #4b5563",
-    padding: "8px 18px",
-    borderRadius: "6px",
-    cursor: "pointer",
-    color: "#fff",
-};

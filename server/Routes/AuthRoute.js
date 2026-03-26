@@ -1,27 +1,4 @@
-// const router = require('express').Router();
-// const {
-//   Signup,
-//   Login,
-//   userVerification,
-//   ForgotPassword,
-//   ResetPassword,
-//   CheckAuth,   
-//   Logout,
-// } = require("../Controllers/AuthController");
-// const { VerifyEmail } = require("../Controllers/AuthController");
 
-// router.get("/verify-email/:token", VerifyEmail);
-
-
-// router.post('/signup', Signup);
-// router.post('/login', Login);
-// router.get('/verify', userVerification);
-// router.post("/logout", Logout);
-// router.get("/check-auth", CheckAuth);
-// router.post("/forgot-password", ForgotPassword);
-// router.post("/reset-password/:token", ResetPassword);
-
-// module.exports = router;
 
 const express = require('express');
 const router = express.Router();

@@ -1,235 +1,657 @@
-/* 1. GLOBAL UI RESET */
+/* --- 1. CORE LAYOUT & RESET --- */
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap');
+
 * {
     box-sizing: border-box;
-    scrollbar-width: none;
-}
-
-*::-webkit-scrollbar {
-    display: none;
-}
-
-html, body {
     margin: 0;
     padding: 0;
-    width: 100vw;
-    height: 100vh;
-    overflow: hidden;
-    font-family: 'Inter', sans-serif;
 }
 
-/* 2. LAYOUT GRID */
-.page-layout {
-    display: flex;
-    flex-direction: column;
+.dashboard-wrapper {
     height: 100vh;
     width: 100vw;
-}
-
-.content-container {
-    display: grid;
-    grid-template-columns: 380px 1fr;
-    gap: 20px;
-    padding: 20px;
-    flex: 1;
-    min-height: 0; /* Important to allow flex children to shrink */
-}
-
-/* Sidebar and Map Column */
-.sidebar-column, .map-column {
     display: flex;
     flex-direction: column;
-    height: 100%;
-    min-height: 0;
-}
-
-/* 3. CARD BOX & ANALYSIS SECTION */
-.card-box {
-    background: rgba(255, 255, 255, 0.85);
-    backdrop-filter: blur(20px);
-    border-radius: 35px;
-    border: 1px solid rgba(255, 255, 255, 0.4);
-    display: flex;
-    flex-direction: column;
-    height: 100%;
     overflow: hidden;
+    background: #020b1a;
+    font-family: 'Montserrat', sans-serif;
 }
 
-.analysis-section {
-    padding: 20px;
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-around;
-    align-items: center;
-    overflow-y: auto; /* Scroll if content exceeds */
+/* --- 2. NAVBAR & VIEWPORT SEPARATION --- */
+
+
+/* --- 2. NAVBAR & VIEWPORT SEPARATION --- */
+.nav-container-fixed {
+    width: 100%;
+    z-index: 2000;
+    position: fixed;   /* 🔥 change */
+    top: 0;            /* 🔥 add */
+    left: 0;           /* 🔥 add */
+    background: #020b1a;
 }
 
-/* 4. RADAR CIRCLE */
-.circle-container {
+/* Push everything below navbar */
+.main-viewport {
     position: relative;
-    width: 180px;
-    height: 180px;
+    width: 100%;
+    height: calc(100vh - 80px); /* Fill the rest of the screen */
+    margin-top: 80px; 
+    z-index: 1;
+}
+
+.full-screen-map {
+    height: 100% !important;
+    width: 100% !important;
+    z-index: 1;
+}
+
+/* --- 3. DRAGGABLE SYSTEM --- */
+.draggable-element {
+    position: absolute !important;
+    z-index: 1001;
+    cursor: grab;
+}
+
+.draggable-element:active {
+    cursor: grabbing;
+}
+
+/* --- 4. MOVABLE SAFE ZONE HUD --- */
+.top-safe-hud {
+    top: 20px;
+    right: 30px; /* Moved to right as seen in screenshot */
+}
+
+.hud-content {
+    background: rgba(11, 30, 58, 0.95);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(0, 255, 65, 0.4);
+    padding: 10px 25px;
+    border-radius: 50px;
     display: flex;
     align-items: center;
-    justify-content: center;
-    margin: 10px 0;
+    gap: 15px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
 }
 
-.svg-circle {
-    transform: rotate(-90deg);
-    width: 180px;
-    height: 180px;
+.hud-dot {
+    width: 10px;
+    height: 10px;
+    background: #00ff41;
+    border-radius: 50%;
+    box-shadow: 0 0 10px #00ff41;
 }
 
-.percentage-text-wrapper {
-    position: absolute;
+.hud-label {
+    font-size: 0.7rem;
+    font-weight: 900;
+    color: #7fd4ff;
+    letter-spacing: 1.5px;
+}
+
+.hud-value {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: #ffffff;
+}
+
+.hud-unit {
+    font-size: 0.8rem;
+    font-weight: 900;
+    color: #00ff41;
+}
+
+/* --- 5. MOVABLE AUDIT CARD --- */
+.floating-sidebar {
+    top: 20px;
+    left: 30px;
+    width: 380px; /* Slightly wider cards for better metric fitting */
+}
+
+.audit-card {
+    background: rgba(11, 30, 58, 0.95);
+    backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 25px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+    /* Removed overflow hidden to allow buttons to show */
+}
+
+.drag-handle {
+    cursor: grab;
+}
+
+.audit-header {
+    background: linear-gradient(135deg, #ff8a00 0%, #e52d27 100%);
+    padding: 16px 25px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border-top-left-radius: 24px;  /* Matches card radius (25) minus border (1) */
+    border-top-right-radius: 24px;
+}
+
+.audit-header h3 {
+    margin: 0;
+    font-size: 0.95rem;
+    font-weight: 900;
+    letter-spacing: 1.5px;
+    color: white;
+    text-transform: uppercase;
+}
+
+.live-dot {
+    width: 10px;
+    height: 10px;
+    background: #ffffff;
+    border-radius: 50%;
+    box-shadow: 0 0 10px #ffffff;
+    animation: blink 2s infinite;
+}
+
+.audit-content {
+    padding: 12px 20px 20px 20px; /* Reduced vertical padding */
     display: flex;
     flex-direction: column;
     align-items: center;
+}
+
+/* --- 6. PROBABILITY RADIAL --- */
+.prob-circle-zone {
+    position: relative;
+    margin-bottom: 12px; /* Reduced */
+    display: flex;
+    align-items: center;
     justify-content: center;
 }
 
-.outer-ring {
+.radial-svg {
+    transform: rotate(-90deg);
+}
+
+.r-bg {
+    fill: none;
+    stroke: rgba(255, 255, 255, 0.05);
+    stroke-width: 14;
+}
+
+.r-progress {
+    fill: none;
+    stroke-width: 14;
+    stroke-linecap: round;
+    filter: drop-shadow(0 0 5px currentColor);
+    transition: stroke-dashoffset 0.8s ease;
+}
+
+.prob-label-wrap {
     position: absolute;
-    width: 200px;
-    height: 200px;
+    text-align: center;
+}
+
+.prob-val {
+    font-size: 3.2rem;
+    font-weight: 700;
+    color: #ffffff;
+    margin: 0;
+}
+
+.prob-sub {
+    font-size: 0.65rem;
+    color: #7fd4ff;
+    font-weight: 800;
+    letter-spacing: 2px;
+}
+
+/* --- 7. RISK STATUS & COORDINATES --- */
+.risk-badge-flat {
+    width: 100%;
+    padding: 10px;
+    border-radius: 12px;
+    text-align: center;
+    font-weight: 900;
+    font-size: 0.8rem;
+    margin-bottom: 12px; /* Reduced */
+    letter-spacing: 1px;
+    border: 1px solid currentColor;
+}
+
+.risk-badge-flat.high {
+    color: #ff3131;
+    background: rgba(255, 49, 49, 0.1);
+}
+
+.risk-badge-flat.moderate {
+    color: #ffc107;
+    background: rgba(255, 193, 7, 0.1);
+}
+
+.risk-badge-flat.low {
+    color: #00ff41;
+    background: rgba(0, 255, 65, 0.1);
+}
+
+.metrics-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    width: 100%;
+    margin-bottom: 12px; /* Reduced */
+}
+
+
+.metric-box {
+    background: rgba(255, 255, 255, 0.05);
+    padding: 10px;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.m-title {
+    font-size: 0.55rem;
+    color: #7fd4ff;
+    font-weight: 700;
+    margin-bottom: 2px;
+}
+
+.m-val {
+    font-size: 0.85rem;
+    color: #ffffff;
+    font-weight: 800;
+}
+
+/* --- 8. ACTION BUTTONS & TOOLS --- */
+.btn-action-primary {
+    width: 100%;
+    padding: 16px;
+    border: none;
+    border-radius: 12px;
+    background: #1560BD;
+    color: white;
+    font-weight: 800;
+    cursor: pointer;
+    margin-bottom: 15px; /* Added spacing */
+}
+
+.btn-helpline-alert {
+    width: 100%;
+    padding: 16px;
+    border: none;
+    border-radius: 12px;
+    background: #ff3131;
+    color: white;
+    font-weight: 900;
+    cursor: pointer;
+    text-transform: uppercase;
+    box-shadow: 0 0 20px rgba(255, 49, 49, 0.4);
+    animation: btn-pulse 1.5s infinite;
+}
+
+@keyframes btn-pulse {
+    0% { transform: scale(1); box-shadow: 0 0 10px rgba(255, 49, 49, 0.6); }
+    50% { transform: scale(1.02); box-shadow: 0 0 25px rgba(255, 49, 49, 0.9); }
+    100% { transform: scale(1); box-shadow: 0 0 10px rgba(255, 49, 49, 0.6); }
+}
+
+
+.recenter-tool {
+    position: absolute;
+    top: 100px;
+    right: 30px;
+    z-index: 1000;
+    background: #ffffff;
+    color: #1a1a1a;
+    border: none;
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    cursor: pointer;
+}
+
+.floating-legend {
+    position: absolute;
+    bottom: 30px;
+    right: 30px;
+    z-index: 1000;
+    background: #ffffff;
+    padding: 10px 20px;
+    border-radius: 15px;
+    display: flex;
+    gap: 15px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    color: #1a1a1a;
+}
+
+.leg-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.7rem;
+    font-weight: 800;
+}
+
+.dot {
+    width: 8px;
+    height: 8px;
     border-radius: 50%;
 }
 
-/* 5. RISK STATUS & BUTTON */
-.risk-status-box {
-    width: 100%;
-    padding: 15px;
-    border-radius: 18px;
-    font-weight: 800;
-    font-size: 1.1rem;
-    text-align: center;
-    margin-bottom: 10px;
+.dot.low { background: #00ff41; }
+.dot.mid { background: #ffc107; }
+.dot.high { background: #ff3131; }
+
+@keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
 }
 
-.risk-yes {
-    background: #ffebeb;
-    color: #ff3131;
+.time-controls-overlay {
+  position: absolute;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
+  width: 400px;
 }
 
-.risk-no {
-    background: #e6ffe6;
-    color: #00b31f;
+.glass-panel {
+  background: rgba(15, 15, 15, 0.85);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  color: white;
 }
 
-.btn-back {
-    width: 100%;
-    padding: 15px;
-    font-size: 0.9rem;
+.play-btn {
+  background: #ff3131;
+  border: none;
+  color: white;
+  padding: 8px;
+  border-radius: 6px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.play-btn.active { background: #ffc107; color: black; }
+
+.time-slider {
+  width: 100%;
+  accent-color: #ff3131;
+}
+
+.step-indicator {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.8rem;
+  font-family: 'Courier New', Courier, monospace;
+}
+
+.time-controls-overlay {
+    position: absolute;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1000; /* Above map, below popups */
+}
+
+.glass-panel-control {
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(10px);
+    padding: 20px;
+    border-radius: 15px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    min-width: 300px;
+}
+
+.play-btn {
+    background: #ff3131;
+    color: white;
     border: none;
-    border-radius: 18px;
-    cursor: pointer;
-    background-color: #ff5e00;
-    color: #fff;
+    padding: 10px;
     font-weight: bold;
+    cursor: pointer;
+    border-radius: 5px;
+    transition: 0.3s;
+}
+
+.play-btn:hover {
+    background: #ff5e5e;
+    transform: scale(1.02);
+}
+
+.step-info {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
     margin-top: 10px;
 }
 
-/* 6. MAP OUTPUT DISPLAY */
-.map-output-display {
-    flex: 1;
-    width: 100%;
-    border-radius: 40px;
-    overflow: hidden;
-    height: 100%;
-}
-
-.leaflet-full-height {
-    width: 100%;
-    height: 100%;
-}
-
-/* Loader */
-.loader-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-
-.spinner {
-    width: 50px;
-    height: 50px;
-    border: 5px solid #f3f3f3;
-    border-top: 5px solid #ff5e00;
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-    margin-bottom: 10px;
-}
-
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
-/* RADAR CIRCLE CONTAINER */
-.circle-container {
-    position: relative;
-    width: 220px;      /* Match the SVG width */
-    height: 220px;     /* Match the SVG height */
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: 10px 0;
-}
-
-.svg-circle {
-    transform: rotate(-90deg);
-    width: 220px;
-    height: 220px;
-}
-
-.circle-bg,
-.circle-progress {
-    fill: none;
-    stroke-width: 15;
-    r: 85;   /* Same as radius in JS */
-    cx: 110; /* Half of SVG width */
-    cy: 110; /* Half of SVG height */
-}
-
-.circle-bg {
-    stroke: rgba(0, 0, 0, 0.1); /* Light grey background */
-}
-
-.circle-progress {
-    stroke-linecap: round;
-    transition: stroke-dashoffset 0.3s ease-out;
-}
-
-.percentage-text-wrapper {
-    position: absolute;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-}
-
-.percentage-text-wrapper h1 {
-    margin: 0;
-    font-size: 2.2rem; /* Big number in center */
-    font-weight: 800;
-}
-
-.percentage-text-wrapper span {
+.step-info span {
+    color: #00ff41; /* Neon green to match your theme */
+    font-family: 'Orbitron', sans-serif; /* Or any techy font you use */
     font-size: 0.9rem;
-    font-weight: 500;
-    color: rgba(0,0,0,0.6);
+    font-weight: bold;
+    letter-spacing: 1.5px;
+    text-shadow: 0 0 5px rgba(0, 255, 65, 0.5);
 }
 
-/* Optional pulse for HIGH risk */
-.risk-pulse .outer-ring {
-    border: 4px solid rgba(255, 94, 0, 0.5);
-    animation: pulse 1.5s infinite;
-    width: 240px;
-    height: 240px;
+/* Make the slider look better too */
+.step-info input[type="range"] {
+    width: 100%;
+    cursor: pointer;
+    accent-color: #ff3131; /* Red slider thumb */
 }
 
-@keyframes pulse {
-    0% { transform: scale(1); opacity: 0.6; }
-    50% { transform: scale(1.1); opacity: 0.3; }
-    100% { transform: scale(1); opacity: 0.6; }
+/* Core Layout & Vertical Scroll Lock */
+.dashboard-wrapper {
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden; /* 🔥 Lock scroll */
+    background-color: #020b1a; /* Match your app background */
+    display: flex;
+    flex-direction: column;
 }
+
+/* --- 10. ADVANCED COMMAND CENTER HUD --- */
+.loading-doodle-overlay {
+    position: fixed;
+    top: 0; left: 0; width: 100vw; height: 100vh;
+    background: radial-gradient(circle at center, #0a1118 0%, #020b1a 100%);
+    z-index: 99999;
+    display: flex; justify-content: center; align-items: center;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.hud-scanner-container {
+    position: relative;
+    width: 300px;
+    height: 300px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 40px;
+}
+
+.hex-grid {
+    position: absolute;
+    width: 200%; height: 200%;
+    background-image: radial-gradient(rgba(0, 255, 65, 0.05) 1px, transparent 1px);
+    background-size: 30px 30px;
+    animation: grid-slide 10s linear infinite;
+    opacity: 0.3;
+}
+
+.radar-circle {
+    position: relative;
+    width: 220px; height: 220px;
+    border: 1px solid rgba(0, 255, 65, 0.3);
+    border-radius: 50%;
+    z-index: 2;
+    background: rgba(0, 255, 65, 0.02);
+}
+
+.scanning-beam {
+    position: absolute;
+    width: 100%; height: 100%;
+    background: conic-gradient(from 0deg, transparent, rgba(0, 255, 65, 0.4));
+    animation: rotate 2.5s linear infinite;
+    border-radius: 50%;
+}
+
+.marker-pings .ping {
+    position: absolute;
+    width: 8px; height: 8px;
+    background: #00ff41;
+    border-radius: 50%;
+    opacity: 0;
+    box-shadow: 0 0 15px #00ff41;
+}
+
+.p1 { top: 40px; left: 60px; animation: ping 3s infinite 0.5s; }
+.p2 { top: 110px; right: 40px; animation: ping 3s infinite 1.2s; }
+.p3 { bottom: 50px; left: 100px; animation: ping 3s infinite 2.1s; }
+
+.analysis-console {
+    width: 450px;
+    background: rgba(11, 30, 58, 0.85);
+    border: 1px solid rgba(0, 255, 65, 0.2);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 30px;
+    box-shadow: 0 0 50px rgba(0, 0, 0, 0.5);
+    z-index: 5;
+}
+
+.console-header {
+    display: flex;
+    justify-content: space-between;
+    border-bottom: 1px solid rgba(0, 255, 65, 0.1);
+    padding-bottom: 10px;
+    margin-bottom: 15px;
+}
+
+.console-title {
+    color: #00ff41;
+    font-size: 0.75rem;
+    font-weight: 800;
+    letter-spacing: 2px;
+}
+
+.console-dots span {
+    display: inline-block;
+    width: 6px; height: 6px;
+    background: #00ff41;
+    border-radius: 50%;
+    margin-left: 5px;
+    opacity: 0.6;
+}
+
+.console-logs {
+    font-family: 'Courier New', monospace;
+    font-size: 0.8rem;
+    color: rgba(0, 255, 65, 0.8);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.log-line { 
+    margin: 0; 
+    animation: fadeInLog 1s both;
+}
+
+.delay-1 { animation-delay: 1s; }
+.delay-2 { animation-delay: 2s; }
+.delay-3 { animation-delay: 3s; }
+.delay-4 { animation-delay: 4s; }
+
+.log-line.highlight {
+    color: #fff;
+    font-weight: bold;
+    text-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
+}
+
+.coordinate-tracker {
+    display: flex;
+    gap: 30px;
+    margin-bottom: 20px;
+    font-family: 'Courier New', monospace;
+    color: #7fd4ff;
+    font-size: 0.9rem;
+    font-weight: bold;
+}
+
+.coord-item span { color: rgba(255, 255, 255, 0.4); margin-right: 5px; }
+
+.scanning-line {
+    position: absolute;
+    width: 100%;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, #00ff41, transparent);
+    box-shadow: 0 0 10px #00ff41;
+    z-index: 3;
+    animation: scan-vertical 4s ease-in-out infinite;
+    top: 50%;
+}
+
+@keyframes scan-vertical {
+    0% { top: 0%; opacity: 0; }
+    50% { opacity: 1; }
+    100% { top: 100%; opacity: 0; }
+}
+
+.progress-status-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+
+.loading-text {
+    color: #00ff41;
+    font-size: 1.4rem;
+    font-weight: 900;
+    text-shadow: 0 0 10px rgba(0, 255, 65, 0.5);
+    margin-bottom: 10px;
+    letter-spacing: 4px;
+    text-align: center;
+}
+
+.progress-bar-mini {
+    width: 320px; height: 6px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.progress-fill.shadow-green {
+    height: 100%;
+    background: #00ff41;
+    width: 0%;
+    animation: fill-bar 5s ease-in-out forwards;
+    box-shadow: 0 0 20px #00ff41;
+}
+
+@keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+@keyframes ping { 0% { opacity: 0; transform: scale(0.5); } 50% { opacity: 1; } 100% { opacity: 0; transform: scale(1.5); } }
+@keyframes grid-slide { from { transform: translate(-20%, -20%); } to { transform: translate(0, 0); } }
+@keyframes fadeInLog { from { opacity: 0; transform: translateX(-10px); } to { opacity: 1; transform: translateX(0); } }
+@keyframes fill-bar { 0% { width: 0%; } 100% { width: 100%; } }

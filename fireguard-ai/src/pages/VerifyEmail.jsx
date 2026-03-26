@@ -1,36 +1,3 @@
-/* 
-import { useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import axios from "axios";
-
-export default function VerifyEmail() {
-  const { token } = useParams();
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    const verifyUser = async () => {
-      try {
-        const res = await axios.get(
-          `http://localhost:4000/verify-email/${token}`,
-          { withCredentials: true }
-        );
-
-        if (res.data.success) {
-          // Cookie already set by backend
-          navigate("/");  // Go to Home (logged in state)
-        } else {
-          navigate("/login");
-        }
-      } catch (err) {
-        navigate("/login");
-      }
-    };
-
-    verifyUser();
-  }, [token, navigate]);
-
-  return <h2>Verifying your email...</h2>;
-} */
 import { useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";

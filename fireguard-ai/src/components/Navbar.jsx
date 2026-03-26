@@ -37,7 +37,8 @@ export default function Navbar() {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const res = await fetch("http://localhost:4000/check-auth", {
+        const apiUrl = import.meta.env.VITE_AUTH_API_URL || "http://localhost:4000";
+        const res = await fetch(`${apiUrl}/check-auth`, {
           method: "GET",
           credentials: "include",
         });
@@ -87,8 +88,9 @@ export default function Navbar() {
     <nav className={`navbar navbar-expand-lg navbar-dark fixed-top forest-navbar ${hideNavbar ? "navbar-hidden" : ""}`}>
       <div className="container-fluid">
 
-        <Link to="/" className="navbar-brand">
-          🔥ForestGuard
+        <Link to="/" className="navbar-brand d-flex align-items-center gap-2">
+          <img src="/logo.png" alt="ForestGuard Logo" style={{ width: '40px', height: '40px', borderRadius: '50%' }} />
+          <span>ForestGuard AI</span>
         </Link>
 
         <button

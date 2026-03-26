@@ -1,204 +1,3 @@
-/* import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import "./Hero.css";
-
-export default function Hero() {
-  const navigate = useNavigate();
-
-  const [user, setUser] = useState(null);
-  const [showAuthPopup, setShowAuthPopup] = useState(false);
-  const [currentSlide, setCurrentSlide] = useState(0);
-
-  // 🔥 Your slide images (use public folder images)
-  const slides = [
-    "/i3.jpg",
-    "/p1.avif",
-    "/p2.avif",
-    "/p3.webp",
-    "/i1.jpg"
-  ];
-
-  // 🔁 Auto slider
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % slides.length);
-    }, 4000);
-
-    return () => clearInterval(interval);
-  }, [slides.length]);
-
-  // 🔐 AUTH CHECK
-  useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        const res = await fetch("http://localhost:4000/check-auth", {
-          credentials: "include",
-        });
-
-        const data = await res.json();
-
-        if (data.status) {
-          setUser(data.user);
-        } else {
-          setUser(null);
-        }
-      } catch {
-        setUser(null);
-      }
-    };
-
-    checkAuth();
-  }, []);
-
-  const handleStartAnalysis = () => {
-    if (!user) {
-      setShowAuthPopup(true);
-    } else {
-      navigate("/input", { state: { isGuest: false } });
-    }
-  };
-
-  const handleGuestMode = () => {
-    setShowAuthPopup(false);
-    navigate("/input", { state: { isGuest: true } });
-  };
-  return (
-  <div className="homepage-wrapper">
-    <div className="hero">
-      <div className="slider">
-        {slides.map((slide, index) => (
-          <div
-            key={index}
-            className={`slide ${index === currentSlide ? "active" : ""}`}
-          >
-           
-            <div
-              className="slide-bg"
-              style={{ backgroundImage: `url(${slide})` }}
-            ></div>
-
-          
-            <div className="slide-left">
-              <h1>
-                Empowering Forest Protection <br />
-                with AI Fire Intelligence
-              </h1>
-              <p>
-                Monitor wildfire risks using advanced machine learning,
-                satellite data, and predictive analytics.
-              </p>
-              <div className="hero-buttons">
-                <button onClick={handleStartAnalysis} className="btn-primary">
-                  🔥 Check Fire Risk
-                </button>
-              </div>
-            </div>
-
-            <div className="slide-right">
-              <img src={slide} alt="Wildfire" />
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-
-    {showAuthPopup && (
-      <div
-        style={{
-          position: "fixed",
-          top: 0,
-          left: 0,
-          width: "100vw",
-          height: "100vh",
-          background: "rgba(0,0,0,0.8)", // Darkened for better focus
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          zIndex: 10000, // Higher than everything
-        }}
-      >
-        <div
-          style={{
-            background: "#111",
-            padding: "35px",
-            borderRadius: "16px",
-            textAlign: "center",
-            width: "320px",
-            boxShadow: "0 0 25px rgba(0,0,0,0.6)",
-            border: "1px solid #333", // Added border for visibility
-          }}
-        >
-          <h3 style={{ color: "white", marginBottom: "20px" }}>
-            Continue to Analysis
-          </h3>
-
-          <button
-            onClick={() => navigate("/login")}
-            style={{
-              width: "100%",
-              padding: "12px",
-              marginBottom: "12px",
-              borderRadius: "8px",
-              border: "none",
-              cursor: "pointer",
-              fontWeight: "bold",
-            }}
-          >
-            Login
-          </button>
-
-          <button
-            onClick={() => navigate("/signup")}
-            style={{
-              width: "100%",
-              padding: "12px",
-              marginBottom: "12px",
-              borderRadius: "8px",
-              border: "none",
-              cursor: "pointer",
-              fontWeight: "bold",
-            }}
-          >
-            Sign Up
-          </button>
-
-          <button
-            onClick={handleGuestMode}
-            style={{
-              width: "100%",
-              padding: "12px",
-              borderRadius: "8px",
-              border: "none",
-              cursor: "pointer",
-              background: "#444",
-              color: "white",
-            }}
-          >
-            Continue as Guest
-          </button>
-
-          <button
-            onClick={() => setShowAuthPopup(false)}
-            style={{
-              marginTop: "20px",
-              background: "none",
-              border: "none",
-              color: "#ff4d4d",
-              cursor: "pointer",
-              fontSize: "14px",
-            }}
-          >
-            Cancel
-          </button>
-        </div>
-      </div>
-    )}
-  </div>
-); 
-
-}
- */
-
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "./Hero.css";
@@ -209,12 +8,43 @@ export default function Hero() {
   const [showAuthPopup, setShowAuthPopup] = useState(false);
   const [currentSlide, setCurrentSlide] = useState(0);
 
-  const slides = ["/i3.jpg", "/p1.avif", "/p2.avif", "/p3.webp", "/i1.jpg"];
+  const slides = [
+    {
+      image: "/img1.jpg",
+      title: "AI Fire Risk Prediction",
+      subtitle: "Machine Learning Analysis",
+      description: "Evaluate real-time fire probability for any coordinate."
+    },
+    {
+      image: "/img2.jpg",
+      title: "Spread Simulation",
+      subtitle: "Cellular Automata Logic",
+      description: "Visualize a high-fidelity 6-hour fire spread forecast based on wind vectors and terrain slope dynamics."
+    },
+    {
+      image: "/img3.jpg",
+      title: "Live Weather Monitoring",
+      subtitle: "Integrated Stations",
+      description: "Track fluctuating wind speeds, humidity drops, and extreme heatwaves via high-frequency global weather station integration."
+    },
+    {
+      image: "/img4.jpg",
+      title: "Emergency Response",
+      subtitle: "Helplines & Protocols",
+      description: "Immediate access to critical emergency contacts and state-authorized safety manuals during peak high-risk detection."
+    },
+    {
+      image: "/img5.jpg",
+      title: "Advanced Analytics",
+      subtitle: "Historical Data Patterns",
+      description: "Access detailed historical fire mapping and data visualization."
+    }
+  ];
 
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % slides.length);
-    }, 4000);
+    }, 5000); // 5 seconds for better reading time
     return () => clearInterval(interval);
   }, [slides.length]);
 
@@ -236,7 +66,6 @@ export default function Hero() {
   }, []);
 
   const handleStartAnalysis = () => {
-    console.log("Button clicked, user status:", user); // Debug log
     if (!user) {
       setShowAuthPopup(true);
     } else {
@@ -260,30 +89,40 @@ export default function Hero() {
             >
               <div
                 className="slide-bg"
-                style={{ backgroundImage: `url(${slide})` }}
-              ></div>
-
-              <div className="slide-left">
-                <h1>
-                  Empowering Forest Protection <br />
-                  with AI Fire Intelligence
-                </h1>
-                <p>
-                  Monitor wildfire risks using advanced machine learning,
-                  satellite data, and predictive analytics.
-                </p>
-                <div className="hero-buttons">
-                  <button onClick={handleStartAnalysis} className="btn-primary">
-                    🔥 Check Fire Risk
-                  </button>
-                </div>
+                style={{ backgroundImage: `url(${slide.image})` }}
+              >
+                <div className="vignette-overlay"></div>
               </div>
 
-              <div className="slide-right">
-                <img src={slide} alt="Wildfire" />
+              <div className="slide-content">
+                <div className="slide-left">
+                  <div className="slide-tag">AI MONITORING 2026</div>
+                  <h1>
+                    {slide.title} <br />
+                    <span>{slide.subtitle}</span>
+                  </h1>
+                  <p>{slide.description}</p>
+                  <div className="hero-buttons">
+                    <button onClick={handleStartAnalysis} className="btn-primary">
+                      🔥 START ANALYSIS
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
           ))}
+          
+          <div className="slider-controls">
+             <div className="slide-indicators">
+                {slides.map((_, idx) => (
+                   <span 
+                    key={idx} 
+                    className={`dot ${idx === currentSlide ? 'active' : ''}`}
+                    onClick={() => setCurrentSlide(idx)}
+                   ></span>
+                ))}
+             </div>
+          </div>
         </div>
       </div>
 

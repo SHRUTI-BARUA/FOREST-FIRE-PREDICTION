@@ -2,17 +2,17 @@
 .hero {
   position: relative;
   width: 100%;
-  min-height: 100vh;
+  height: 100vh;
   overflow: hidden;
-  color:white;
-
+  color: white;
+  background: #000;
 }
+
 .homepage-wrapper {
   background-color: #051818;
   min-height: 100vh;
   width: 100%;
 }
-
 
 /* SLIDER WRAPPER */
 .slider {
@@ -24,81 +24,168 @@
 .slide {
   position: absolute;
   inset: 0;
-  display: flex;
-  /* Change 1: Center se hata kar flex-start karo */
-  align-items: flex-start; 
-  
-  /* Change 2: Yahan se content ko niche push karo */
-  padding-top: 150px; 
-  
-  justify-content: space-between;
-  padding-left: 8%;
-  padding-right: 8%;
-  box-sizing: border-box;
   opacity: 0;
-  transition: opacity 1s ease-in-out;
+  transition: opacity 1.2s ease-in-out;
+  display: flex;
+  align-items: center;
+  z-index: 1;
 }
+
 .slide.active {
   opacity: 1;
   z-index: 2;
 }
 
-/* BLURRED BACKGROUND */
+/* BACKGROUND IMAGE - NO CROPPING / ELONGATION */
 .slide-bg {
   position: absolute;
   inset: 0;
   background-size: cover;
   background-position: center;
-  filter: blur(30px) brightness(55%);
-  transform: scale(1.2);
+  background-repeat: no-repeat;
   z-index: 0;
 }
 
-/* TEXT + IMAGE ABOVE BACKGROUND */
-.slide-left,
-.slide-right {
+/* VIGNETTE TO ENSURE TEXT READABILITY (Like movie reference) */
+.vignette-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg, 
+    rgba(0,0,0,0.85) 0%, 
+    rgba(0,0,0,0.4) 40%, 
+    rgba(0,0,0,0) 100%
+  ),
+  linear-gradient(
+    0deg, 
+    rgba(0,0,0,0.8) 0%, 
+    rgba(0,0,0,0) 30%
+  );
+}
+
+/* CONTENT POSITIONING */
+.slide-content {
   position: relative;
-  z-index: 2;
+  z-index: 5;
+  padding-left: 8%;
+  width: 100%;
+  max-width: 1400px;
 }
 
-/* LEFT SIDE */
 .slide-left {
-  flex: 1;
-  max-width: 600px;
+  max-width: 700px;
+  animation: fadeUp 1s ease-out;
 }
 
-/* RIGHT SIDE */
-.slide-right {
-  flex: 1;
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.slide-tag {
+  color: #ff4d4d;
+  font-weight: 900;
+  letter-spacing: 4px;
+  font-size: 0.8rem;
+  margin-bottom: 20px;
+  text-transform: uppercase;
+}
+
+.slide-left h1 {
+  font-size: clamp(2.5rem, 5vw, 4.5rem);
+  line-height: 1.1;
+  margin-bottom: 25px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.slide-left h1 span {
+  color: transparent;
+  -webkit-text-stroke: 1px rgba(255,255,255,0.8);
+  display: block;
+}
+
+.slide-left p {
+  font-size: 1.2rem;
+  line-height: 1.6;
+  color: rgba(255,255,255,0.7);
+  margin-bottom: 40px;
+  max-width: 550px;
+}
+
+/* BUTTONS */
+.hero-buttons {
   display: flex;
-  justify-content: flex-end;
+  gap: 20px;
+  margin-left: 0 !important; /* Resetting previous hack */
 }
 
-.slide-right img {
-  max-height: 75vh;
-  width: auto;
-  border-radius: 16px;
-  box-shadow: 0 20px 40px rgba(0,0,0,0.4);
-  object-fit: contain;
+.btn-primary {
+  background: #ff4d4d;
+  color: white;
+  border: none;
+  padding: 16px 40px;
+  font-size: 1rem;
+  font-weight: 800;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s;
+  text-transform: uppercase;
 }
 
-/* RESPONSIVE */
-@media (max-width: 900px) {
-  .slide {
-    flex-direction: column;
-    text-align: center;
-    justify-content: center;
-  }
-
-  .slide-right {
-    justify-content: center;
-    margin-top: 40px;
-  }
-
-  .slide-right img {
-    max-height: 60vh;
-  }
+.btn-primary:hover {
+  background: #e60000;
+  transform: translateY(-3px);
+  box-shadow: 0 10px 20px rgba(255, 77, 77, 0.3);
 }
+
+.btn-secondary {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  padding: 16px 40px;
+  font-size: 1rem;
+  font-weight: 800;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s;
+  text-transform: uppercase;
+}
+
+.btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateY(-3px);
+}
+
+/* INDICATORS (Dots) */
+.slider-controls {
+  position: absolute;
+  bottom: 50px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+}
+
+.slide-indicators {
+  display: flex;
+  gap: 12px;
+}
+
+.dot {
+  width: 12px;
+  height: 4px;
+  background: rgba(255,255,255,0.3);
+  border-radius: 2px;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.dot.active {
+  width: 40px;
+  background: #ff4d4d;
+}
+
 
 /* Container for the new section */
 .product-portfolio {

@@ -1,12 +1,17 @@
 import os
 import joblib
+import requests
 import pandas as pd
 import numpy as np
 import datetime
-import requests
+import urllib3
 from flask import Flask, request, jsonify
 from flask_cors import CORS
+from fire_spread import simulate_fire
+from functools import lru_cache
+from concurrent.futures import ThreadPoolExecutor
 
+<<<<<<< HEAD
 app = Flask(__name__)
 CORS(app)
 
@@ -167,3 +172,6 @@ def predict():
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
+=======
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+>>>>>>> fbe1191 (SIMULATION IMPLEMENTED)
