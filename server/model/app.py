@@ -19,33 +19,75 @@ load_dotenv()  # Load environment variables from .env file
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
-# ✅ SERVICE ACCOUNT AUTH — loaded from environment variables (no JSON file needed)
-SERVICE_ACCOUNT = os.environ.get("GEE_SERVICE_ACCOUNT", "")
+# ✅ SERVICE ACCOUNT AUTH — robust initialization with multiple fallbacks
+SERVICE_ACCOUNT = os.environ.get("GEE_SERVICE_ACCOUNT", os.environ.get("GEE_CLIENT_EMAIL", ""))
+gee_initialized = False
 
-# Build the credentials dict from individual env vars
-_gee_key_data = {
-    "type": "service_account",
-    "project_id": os.environ.get("GEE_PROJECT_ID", ""),
-    "private_key_id": os.environ.get("GEE_PRIVATE_KEY_ID", ""),
-    "private_key": os.environ.get("GEE_PRIVATE_KEY", "").replace("\\n", "\n"),
-    "client_email": os.environ.get("GEE_CLIENT_EMAIL", SERVICE_ACCOUNT),
-    "client_id": os.environ.get("GEE_CLIENT_ID", ""),
-    "auth_uri": "https://accounts.google.com/o/oauth2/auth",
-    "token_uri": "https://oauth2.googleapis.com/token",
-    "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
-    "client_x509_cert_url": f"https://www.googleapis.com/robot/v1/metadata/x509/{SERVICE_ACCOUNT.replace('@', '%40')}",
-    "universe_domain": "googleapis.com"
-}
+try:
+    _gee_key_data = None
 
-# Write a temporary key file in memory via a named temp file, or use ServiceAccountCredentials directly
-import tempfile
-_tmp_key_file = tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False)
-json.dump(_gee_key_data, _tmp_key_file)
-_tmp_key_file.flush()
-_tmp_key_file.close()
+    # Option 1: Full JSON string in env variable
+    gee_json_env = os.environ.get("GEE_SERVICE_ACCOUNT_JSON", "").strip()
+    if gee_json_env:
+        try:
+            import base64
+            if gee_json_env.startswith("{"):
+                _gee_key_data = json.loads(gee_json_env)
+            else:
+                _gee_key_data = json.loads(base64.b64decode(gee_json_env).decode('utf-8'))
+        except Exception as err:
+            print(f"Failed to parse GEE_SERVICE_ACCOUNT_JSON: {err}")
 
-credentials = ee.ServiceAccountCredentials(SERVICE_ACCOUNT, _tmp_key_file.name)
-ee.Initialize(credentials)
+    # Option 2: Local json file if available
+    if not _gee_key_data and os.path.exists("gee-service-account.json"):
+        with open("gee-service-account.json", "r") as f:
+            _gee_key_data = json.load(f)
+
+    # Option 3: Construct from individual environment variables
+    if not _gee_key_data:
+        raw_key = os.environ.get("GEE_PRIVATE_KEY", "").strip()
+        # Strip outer quotes if present
+        if (raw_key.startswith('"') and raw_key.endswith('"')) or (raw_key.startswith("'") and raw_key.endswith("'")):
+            raw_key = raw_key[1:-1]
+        # Replace escaped newlines with real newlines
+        raw_key = raw_key.replace("\\n", "\n").replace("\\r", "").strip()
+        if raw_key and not raw_key.endswith("\n"):
+            raw_key += "\n"
+
+        client_email = os.environ.get("GEE_CLIENT_EMAIL", SERVICE_ACCOUNT)
+        if raw_key and client_email:
+            _gee_key_data = {
+                "type": "service_account",
+                "project_id": os.environ.get("GEE_PROJECT_ID", ""),
+                "private_key_id": os.environ.get("GEE_PRIVATE_KEY_ID", ""),
+                "private_key": raw_key,
+                "client_email": client_email,
+                "client_id": os.environ.get("GEE_CLIENT_ID", ""),
+                "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+                "token_uri": "https://oauth2.googleapis.com/token",
+                "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+                "client_x509_cert_url": f"https://www.googleapis.com/robot/v1/metadata/x509/{client_email.replace('@', '%40')}",
+                "universe_domain": "googleapis.com"
+            }
+
+    if _gee_key_data and _gee_key_data.get("private_key"):
+        import tempfile
+        _tmp_key_file = tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False)
+        json.dump(_gee_key_data, _tmp_key_file)
+        _tmp_key_file.flush()
+        _tmp_key_file.close()
+
+        credentials = ee.ServiceAccountCredentials(
+            _gee_key_data.get("client_email", SERVICE_ACCOUNT),
+            _tmp_key_file.name
+        )
+        ee.Initialize(credentials)
+        gee_initialized = True
+        print("✅ Google Earth Engine initialized successfully.")
+    else:
+        print("ℹ️ GEE credentials not provided. Using fallback NDVI values.")
+except Exception as e:
+    print(f"⚠️ GEE Initialization warning: {e}. App will continue with fallback NDVI.")
 
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
