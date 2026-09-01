@@ -1,0 +1,45 @@
+:root {
+    --primary-orange: #f97316;
+    --primary-red: #ef4444;
+    --primary-green: #22c55e;
+    /* High-end Dark Navy Gradient */
+    --bg-gradient: linear-gradient(135deg, #0a192f 0%, #020c1b 100%);
+    --text-main: #e6f1ff;
+}
+
+html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    min-height: 100vh;
+    /* Forces the dark theme even if Bootstrap/System tries to change it */
+    background: var(--bg-gradient) !important;
+    background-attachment: fixed !important;
+    color: var(--text-main);
+    font-family: 'Inter', sans-serif;
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+
+#root {
+    min-height: 100vh;
+    width: 100%;
+    background: transparent !important;
+}
+
+.btn-primary {
+    background: linear-gradient(to right, #ea580c, #dc2626, #f97316);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 12px 24px;
+    border-radius: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 10px 15px rgba(0, 0, 0, 0.3);
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 15px 20px rgba(0, 0, 0, 0.4);
+}

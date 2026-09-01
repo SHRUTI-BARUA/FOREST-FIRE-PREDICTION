@@ -1,0 +1,24 @@
+# Node
+node_modules/
+.env
+
+# Python / Flask
+__pycache__/
+instance/
+*.pyc
+venv/
+
+# React build
+build/
+dist/
+
+# System files
+.DS_Store
+*.log
+
+# Google Earth Engine credentials (NEVER commit)
+server/model/gee-service-account.json
+gee-service-account.json
+
+# Large binary model/data files (add separately or via Git LFS)
+server/model/landcover.tif

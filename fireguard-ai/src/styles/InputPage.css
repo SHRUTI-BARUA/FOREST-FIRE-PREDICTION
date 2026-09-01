@@ -1,0 +1,537 @@
+/* =========================================
+   1. GLOBAL & ROOT LAYOUT
+   ========================================= */
+
+html,
+body {
+    margin: 0;
+    padding: 0;
+    height: 100vh !important;
+    width: 100vw !important;
+    background: radial-gradient(circle at 20% 30%, #02112a 0%, #010816 60%) !important;
+    /* FIXED */
+    overflow: hidden;
+}
+
+#root,
+.page-layout {
+    display: flex !important;
+    flex-direction: column !important;
+    width: 100vw !important;
+    height: 100vh !important;
+}
+
+.content-container {
+    display: grid !important;
+    grid-template-columns: 380px 1fr !important;
+    gap: 25px !important;
+    padding: 25px !important;
+    margin-top: 65px !important;
+    height: calc(100vh - 65px) !important;
+    box-sizing: border-box !important;
+    align-items: stretch !important;
+}
+
+
+/* =========================================
+   2. SIDEBAR (GHOST PULSE - FULL LENGTH)
+   ========================================= */
+
+.sidebar-column {
+    height: 100% !important;
+    display: flex !important;
+    flex-direction: column !important;
+}
+
+.card-box.main-input-card {
+    position: relative !important;
+    flex: 1 !important;
+    background: #0b1e3a !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    backdrop-filter: blur(35px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(35px) saturate(180%) !important;
+    border-radius: 28px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: visible !important;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.7), 0 0 40px rgba(21, 96, 189, 0.25), 0 0 0 1px rgba(255, 255, 255, 0.06) inset !important;
+    /* FIXED */
+    z-index: 1;
+}
+
+.card-box.main-input-card::before {
+    content: "" !important;
+    position: absolute !important;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border-radius: 28px !important;
+    border: 3.5px solid #ff5e00 !important;
+    z-index: -1;
+    animation: ghostPulse 3s infinite ease-in-out !important;
+}
+
+@keyframes ghostPulse {
+    0% {
+        transform: scale(1);
+        opacity: 0;
+    }
+    50% {
+        transform: scale(1.01);
+        opacity: 1;
+        border-color: #ffcc00;
+        box-shadow: 0 0 20px rgba(255, 94, 0, 0.4);
+    }
+    100% {
+        transform: scale(1.02);
+        opacity: 0;
+    }
+}
+
+.card-orange-header {
+    background: linear-gradient(135deg, #ff5e00 0%, #ff8c00 100%) !important;
+    padding: 24px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    color: white !important;
+    border-top-left-radius: 28px !important;
+    border-top-right-radius: 28px !important;
+}
+
+.card-content-padding {
+    padding: 30px 25px !important;
+    flex: 1 !important;
+    display: flex !important;
+    flex-direction: column !important;
+}
+
+
+/* =========================================
+   3. INPUTS & DYNAMIC SPACING
+   ========================================= */
+
+.input-group {
+    margin-bottom: 12px !important;
+}
+
+.input-group label {
+    display: block !important;
+    font-size: 1.1rem !important;
+    font-weight: 900 !important;
+    color: #7fd4ff !important;
+    /* FIXED */
+    margin-bottom: 6px !important;
+    text-transform: uppercase !important;
+}
+
+.input-group input {
+    width: 100% !important;
+    padding: 15px 18px !important;
+    border-radius: 12px !important;
+    background: #0f1f3d !important;
+    border: 2px solid rgba(255, 255, 255, 0.12) !important;
+    /* FIXED */
+    color: #ffffff !important;
+    font-size: 1.1rem !important;
+    font-weight: 700 !important;
+    outline: none !important;
+    transition: all 0.3s ease !important;
+}
+
+.input-group input:focus,
+.input-group input:active,
+.input-group input:not(:placeholder-shown) {
+    border: 2px solid #1560BD !important;
+    /* FIXED */
+    background: #132a52 !important;
+    /* FIXED */
+    box-shadow: 0 0 20px rgba(21, 96, 189, 0.4) !important;
+    /* FIXED */
+}
+
+
+/* =========================================
+   4. ACTION BUTTONS (TIGHT GAP)
+   ========================================= */
+
+.buttons-wrapper {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 12px !important;
+    margin-top: 10px !important;
+    padding-top: 10px;
+}
+
+.btn-orange-action {
+    width: 100% !important;
+    padding: 16px !important;
+    border-radius: 14px !important;
+    background: linear-gradient(135deg, #ff416c 0%, #ff4b2b 100%) !important;
+    color: white !important;
+    font-size: 1rem !important;
+    font-weight: 800 !important;
+    text-transform: uppercase !important;
+    border: none !important;
+    cursor: pointer !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 8px !important;
+    box-shadow: 0 10px 25px rgba(255, 65, 108, 0.3) !important;
+    transition: all 0.3s ease !important;
+}
+
+.btn-orange-action:hover {
+    transform: translateY(-3px) !important;
+    box-shadow: 0 15px 30px rgba(255, 65, 108, 0.5) !important;
+}
+
+
+/* =========================================
+   5. MAP (FULL VERTICAL STRETCH)
+   ========================================= */
+
+.map-column {
+    height: 100% !important;
+    display: flex !important;
+    flex-direction: column !important;
+}
+
+.map-card-container {
+    flex: 1 !important;
+    border-radius: 32px !important;
+    overflow: hidden !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    background: #010816 !important;
+    position: relative !important;
+}
+
+.leaflet-container {
+    height: 100% !important;
+    width: 100% !important;
+    position: absolute !important;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    z-index: 1 !important;
+}
+
+
+/* =========================================
+   6. SEARCH BAR
+   ========================================= */
+
+.horizontal-search-bar {
+    position: absolute !important;
+    top: 25px !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    z-index: 1000 !important;
+}
+
+.search-pill {
+    background: #f1f5ff !important;
+    /* slightly softer than pure white */
+    display: flex !important;
+    align-items: center !important;
+    padding: 0 20px !important;
+    height: 52px !important;
+    border-radius: 26px !important;
+    width: 450px !important;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4) !important;
+}
+
+.search-pill input {
+    background: transparent !important;
+    border: none !important;
+    width: 100% !important;
+    color: #010816 !important;
+    font-weight: 700 !important;
+    outline: none !important;
+}
+
+
+/* =========================================
+   8. FULL-SCREEN GLOBAL LOADER (CENTERED)
+   ========================================= */
+
+.global-loader-overlay {
+    position: fixed !important;
+    top: 0;
+    left: 0;
+    width: 100vw !important;
+    height: 100vh !important;
+    background: rgba(1, 8, 22, 0.85) !important; /* Slightly darker for focus */
+    backdrop-filter: blur(12px) !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    z-index: 9999 !important; 
+}
+
+/* Large Orange Spinner */
+.large-spinner {
+    width: 70px !important;
+    height: 70px !important;
+    border: 6px solid rgba(255, 94, 0, 0.1) !important;
+    border-top: 6px solid #ff5e00 !important;
+    border-radius: 50% !important;
+    animation: spin 1s linear infinite !important;
+    margin-bottom: 25px;
+    box-shadow: 0 0 30px rgba(255, 94, 0, 0.2);
+}
+
+/* Main Status Text (Center) */
+.loader-status-main {
+    font-size: 1.6rem !important;
+    font-weight: 900 !important;
+    color: #64ffda !important;
+    text-transform: uppercase;
+    letter-spacing: 4px;
+    text-align: center;
+    animation: pulseText 1.5s infinite ease-in-out;
+}
+
+/* Smaller Sub-text */
+.loader-sub-text {
+    margin-top: 12px;
+    font-size: 0.95rem !important;
+    color: rgba(255, 255, 255, 0.6) !important;
+    font-weight: 500;
+    letter-spacing: 1px;
+}
+
+/* KEYFRAMES */
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+@keyframes pulseText {
+    0%, 100% {
+        opacity: 0.6;
+        transform: scale(0.95);
+    }
+    50% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+.loader-status-main {
+    font-size: 1.4rem !important;
+    font-weight: 800 !important;
+    color: #64ffda !important;
+    text-transform: uppercase;
+    letter-spacing: 2px; /* Slightly tighter for readability */
+    text-align: center;
+    min-height: 2em; /* Prevents layout jump when text changes */
+}
+
+.loader-sub-text {
+    font-family: 'Courier New', Courier, monospace; /* Makes coordinates look technical */
+    color: #ff8c00 !important;
+    margin-top: 5px;
+}
+/* 1. Background with a hint of Amber */
+.global-loader-overlay {
+    position: fixed !important;
+    inset: 0;
+    background: radial-gradient(circle at center, #1a2332 0%, #050a14 100%) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    z-index: 9999 !important;
+    overflow: hidden;
+}
+
+/* 2. The Subtle Orange "Heat" Glow */
+.loader-amber-glow {
+    position: absolute;
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(circle, rgba(255, 94, 0, 0.08) 0%, transparent 70%);
+    z-index: 0;
+    animation: pulseGlow 4s ease-in-out infinite;
+}
+
+/* 3. Dual-Tone Spinner (Teal top, Orange glow) */
+.large-spinner-side-dual {
+    width: 85px !important;
+    height: 85px !important;
+    border: 3px solid rgba(255, 255, 255, 0.05) !important;
+    border-top: 3px solid #64ffda !important; /* Teal */
+    border-right: 3px solid #ff8c00 !important; /* Subtle Orange hint */
+    border-radius: 50% !important;
+    animation: spin 0.8s linear infinite !important;
+    box-shadow: 0 0 20px rgba(255, 140, 0, 0.2);
+}
+
+/* 4. Text Grouping */
+.status-header {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.pulse-dot-orange {
+    width: 12px;
+    height: 12px;
+    background: #ff5e00;
+    border-radius: 50%;
+    box-shadow: 0 0 10px #ff5e00;
+    animation: blink 1s infinite;
+}
+
+.loader-status-main {
+    font-size: 2.5rem !important;
+    font-weight: 900 !important;
+    color: #ffffff !important;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin: 0 !important;
+}
+
+/* 5. Orange Scanning Line */
+.scanning-line-orange {
+    position: absolute;
+    width: 100%;
+    height: 2px;
+    background: linear-gradient(to right, transparent, rgba(255, 94, 0, 0.4), transparent);
+    box-shadow: 0 0 10px rgba(255, 94, 0, 0.3);
+    z-index: 5;
+    animation: scanMove 3s ease-in-out infinite;
+}
+
+/* KEYFRAMES */
+@keyframes pulseGlow {
+    0%, 100% { transform: scale(1); opacity: 0.5; }
+    50% { transform: scale(1.2); opacity: 1; }
+}
+
+@keyframes scanMove {
+    0% { top: 0%; }
+    100% { top: 100%; }
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+@keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+}
+
+/* Reusing your grid but making it even lighter */
+.loader-grid-bg-light {
+    position: absolute;
+    inset: 0;
+    background-image: 
+        linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+    background-size: 50px 50px;
+    z-index: 1;
+}
+/* --- THE SUBTLE GRID (BACK AGAIN) --- */
+.loader-grid-bg-subtle {
+    position: absolute;
+    inset: 0;
+    /* Very faint white lines for a clean look */
+    background-image: 
+        linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+    background-size: 50px 50px;
+    z-index: 1;
+    /* This tilt adds a sense of depth/scale */
+    transform: perspective(1000px) rotateX(20deg);
+    transform-origin: center;
+    animation: gridScroll 20s linear infinite;
+}
+
+@keyframes gridScroll {
+    0% { background-position: 0 0; }
+    100% { background-position: 0 50px; }
+}
+
+/* --- ENSURING THE LAYOUT STAYS HORIZONTAL --- */
+/* --- THE FULL SCREEN GRID --- */
+.loader-grid-bg-full {
+    position: absolute;
+    inset: -100px; /* Slight overflow to handle the rotation/tilt */
+    background-image: 
+        linear-gradient(rgba(100, 255, 218, 0.05) 1.5px, transparent 1.5px),
+        linear-gradient(90deg, rgba(100, 255, 218, 0.05) 1.5px, transparent 1.5px);
+    background-size: 60px 60px;
+    z-index: 1;
+    /* Removed the tilt for a "flat map" clean look, or keep it if you like depth */
+    animation: gridMoveSlow 15s linear infinite;
+}
+
+@keyframes gridMoveSlow {
+    0% { transform: translateY(0); }
+    100% { transform: translateY(60px); }
+}
+
+/* --- THE TRANSPARENT LAYOUT (No dark box) --- */
+.loader-horizontal-layout-transparent {
+    position: relative;
+    z-index: 10;
+    display: flex !important;
+    flex-direction: row !important; 
+    flex-wrap: nowrap !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 50px !important;
+    /* Completely removed the background color/box */
+    background: transparent !important; 
+}
+
+/* --- SPINNER & TEXT ENHANCEMENTS --- */
+.large-spinner-dual {
+    width: 100px !important;
+    height: 100px !important;
+    border: 5px solid rgba(255, 255, 255, 0.05) !important;
+    border-top: 5px solid #64ffda !important; /* Teal */
+    border-bottom: 5px solid #ff8c00 !important; /* Orange Glow */
+    border-radius: 50% !important;
+    animation: spin 1s linear infinite !important;
+    box-shadow: 0 0 30px rgba(100, 255, 218, 0.2);
+}
+
+.loader-status-main {
+    font-size: 3.5rem !important; /* Even bigger to stand out against grid */
+    font-weight: 900 !important;
+    color: #ffffff !important;
+    margin: 0 !important;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    /* Added a slight glow to the text so it stays readable over grid lines */
+    text-shadow: 0 0 20px rgba(0, 0, 0, 0.8), 0 0 10px rgba(255, 255, 255, 0.2);
+}
+
+.loader-amber-glow {
+    position: absolute;
+    width: 100vw;
+    height: 100vh;
+    background: radial-gradient(circle at center, rgba(255, 94, 0, 0.12) 0%, transparent 70%);
+    z-index: 0;
+}
+
+.pulse-dot-orange {
+    width: 18px;
+    height: 18px;
+    background: #ff5e00;
+    border-radius: 50%;
+    box-shadow: 0 0 20px #ff5e00;
+    animation: blink 0.8s infinite;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
