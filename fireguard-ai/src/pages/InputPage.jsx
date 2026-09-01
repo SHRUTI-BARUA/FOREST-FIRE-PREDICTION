@@ -247,7 +247,10 @@ export default function InputPage() {
                 <MapResizer />
                 <MapFlyTo position={position} />
                 <MapSearch setLat={setLat} setLo={setLo} />
-                <TileLayer url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png" />
+                <TileLayer
+                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                  attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                />
                 <LocationMarker />
               </MapContainer>
             </div>
