@@ -144,9 +144,14 @@ class FireRiskModel:
         probs = self.predict_proba(data)
         return (probs >= threshold).astype(int)
 # ================= LOAD MODEL =================
+model = None
+bounds = None
 try:
+    import sys
+    setattr(sys.modules['__main__'], 'FireRiskModel', FireRiskModel)
     model = joblib.load("final_fire_model.pkl")
     bounds = joblib.load("training_frontiers.pkl")
+    print("✅ ML Model loaded successfully.")
 except Exception as e:
     print(f"Error loading model files: {e}")
 
@@ -163,24 +168,38 @@ def download_landcover(url, destination):
         match = re.search(r'/d/([a-zA-Z0-9_-]+)', url) or re.search(r'id=([a-zA-Z0-9_-]+)', url)
         file_id = match.group(1) if match else url
         session = requests.Session()
-        gdrive_url = "https://docs.google.com/uc?export=download"
-        response = session.get(gdrive_url, params={'id': file_id, 'confirm': 't'}, stream=True)
-        token = None
-        for key, value in response.cookies.items():
-            if key.startswith('download_warning'):
-                token = value
-                break
-        if token:
-            response = session.get(gdrive_url, params={'id': file_id, 'confirm': token}, stream=True)
+        direct_url = f"https://drive.usercontent.google.com/download?id={file_id}&export=download&authuser=0&confirm=t"
+        response = session.get(direct_url, stream=True, timeout=120)
+        if response.status_code != 200:
+            gdrive_url = "https://docs.google.com/uc?export=download"
+            response = session.get(gdrive_url, params={'id': file_id, 'confirm': 't'}, stream=True, timeout=120)
     else:
-        response = requests.get(url, stream=True)
+        response = requests.get(url, stream=True, timeout=120)
     
     response.raise_for_status()
     with open(destination, "wb") as f:
-        for chunk in response.iter_content(chunk_size=32768):
+        for chunk in response.iter_content(chunk_size=65536):
             if chunk:
                 f.write(chunk)
+    
+    if os.path.exists(destination):
+        with open(destination, "rb") as f:
+            header = f.read(50)
+            if b"<html" in header.lower() or b"<!doctype" in header.lower():
+                os.remove(destination)
+                raise ValueError("Downloaded file is an HTML error page instead of a GeoTIFF.")
     print("Download complete.")
+
+if os.path.exists(LANDCOVER_FILE):
+    try:
+        with rasterio.open(LANDCOVER_FILE) as _test_ds:
+            pass
+    except Exception:
+        print(f"Existing {LANDCOVER_FILE} is invalid. Re-downloading...")
+        try:
+            os.remove(LANDCOVER_FILE)
+        except Exception:
+            pass
 
 if not os.path.exists(LANDCOVER_FILE):
     if LANDCOVER_DOWNLOAD_URL:
@@ -193,6 +212,7 @@ if not os.path.exists(LANDCOVER_FILE):
 
 try:
     landcover_dataset = rasterio.open(LANDCOVER_FILE)
+    print("✅ Landcover dataset opened successfully.")
 except Exception as e:
     print(f"Error opening {LANDCOVER_FILE}: {e}")
     landcover_dataset = None
@@ -314,6 +334,17 @@ def get_live_weather(lat, lon):
         return None
 
 # ================= ROUTES =================
+
+@app.route("/", methods=["GET", "HEAD"])
+@app.route("/health", methods=["GET", "HEAD"])
+def root():
+    return jsonify({
+        "status": "online",
+        "service": "FireGuard AI Flask API",
+        "model_loaded": model is not None,
+        "gee_initialized": gee_initialized,
+        "landcover_loaded": landcover_dataset is not None
+    }), 200
 
 @app.route("/search", methods=["GET"])
 def proxy_search():
