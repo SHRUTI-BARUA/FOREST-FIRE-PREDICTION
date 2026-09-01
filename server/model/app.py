@@ -77,13 +77,17 @@ try:
         _tmp_key_file.flush()
         _tmp_key_file.close()
 
+        proj_id = _gee_key_data.get("project_id") or os.environ.get("GEE_PROJECT_ID", "fire-483411")
         credentials = ee.ServiceAccountCredentials(
             _gee_key_data.get("client_email", SERVICE_ACCOUNT),
             _tmp_key_file.name
         )
-        ee.Initialize(credentials)
+        if proj_id:
+            ee.Initialize(credentials, project=proj_id)
+        else:
+            ee.Initialize(credentials)
         gee_initialized = True
-        print("✅ Google Earth Engine initialized successfully.")
+        print(f"✅ Google Earth Engine initialized successfully with project {proj_id}.")
     else:
         print("ℹ️ GEE credentials not provided. Using fallback NDVI values.")
 except Exception as e:
