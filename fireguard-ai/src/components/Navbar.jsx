@@ -1,6 +1,8 @@
 import React, { useEffect, useState, useRef } from "react"; // 🔴 useRef added
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import "../styles/Navbar.css";
+import { AUTH_API_URL, MODEL_API_URL } from '../config/api';
+
 
 export default function Navbar() {
   const navigate = useNavigate();
@@ -15,8 +17,8 @@ export default function Navbar() {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const apiUrl = import.meta.env.VITE_AUTH_API_URL || "http://localhost:4000";
-        const res = await fetch(`${apiUrl}/check-auth`, {
+        const AUTH_API_URL = import.meta.env.VITE_AUTH_API_URL || AUTH_API_URL;
+        const res = await fetch(`${AUTH_API_URL}/check-auth`, {
           method: "GET",
           credentials: "include",
         });
@@ -39,7 +41,7 @@ export default function Navbar() {
   // ✅ Logout (original logic kept)
   const handleLogout = async () => {
     try {
-      await fetch("http://localhost:4000/logout", {
+      await fetch(`${AUTH_API_URL}/logout`, {
         method: "POST",
         credentials: "include",
       });

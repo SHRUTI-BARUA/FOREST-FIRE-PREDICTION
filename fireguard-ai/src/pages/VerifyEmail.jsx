@@ -2,6 +2,8 @@ import { useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import Swal from "sweetalert2";
+import { AUTH_API_URL, MODEL_API_URL } from '../config/api';
+
 
 export default function VerifyEmail() {
   const { token } = useParams();

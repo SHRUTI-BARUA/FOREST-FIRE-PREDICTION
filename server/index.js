@@ -21,10 +21,12 @@ mongoose
     .then(() => console.log("MongoDB is connected successfully"))
     .catch((err) => console.error(err));
 
+const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:3000";
+
 // ✅ Middlewares
 app.use(
     cors({
-        origin: "http://localhost:3000",
+        origin: FRONTEND_URL,
         credentials: true,
         methods: ["GET", "POST", "PUT", "DELETE"],
     })

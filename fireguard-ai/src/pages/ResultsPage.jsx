@@ -17,6 +17,8 @@ import "../styles/ResultsPage.css";
 // --- Leaflet Icon Fix ---
 import icon from "leaflet/dist/images/marker-icon.png";
 import iconShadow from "leaflet/dist/images/marker-shadow.png";
+import { AUTH_API_URL, MODEL_API_URL } from '../config/api';
+
 
 let DefaultIcon = L.icon({
     iconUrl: icon,
@@ -123,7 +125,7 @@ export default function ResultsPage() {
                 // Fetch Single Point Prediction if not available
                 let predData = prediction;
                 if (!predData) {
-                    const predRes = await fetch("http://localhost:5000/predict", {
+                    const predRes = await fetch(`${MODEL_API_URL}/predict`, {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
                         body: JSON.stringify({ latitude: lat, longitude: lo }),
@@ -275,7 +277,7 @@ export default function ResultsPage() {
                                     // 🚀 Processing simulation on-demand as requested
                                     setIsProcessing(true);
                                     try {
-                                        const res = await fetch("http://localhost:5000/predict-grid", {
+                                        const res = await fetch(`${MODEL_API_URL}/predict-grid`, {
                                             method: "POST",
                                             headers: { "Content-Type": "application/json" },
                                             body: JSON.stringify({ latitude: lat, longitude: lo }),

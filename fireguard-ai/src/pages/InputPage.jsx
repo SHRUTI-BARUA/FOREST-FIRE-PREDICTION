@@ -15,6 +15,8 @@ import Navbar from "../components/Navbar";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import "../styles/InputPage.css";
+import { AUTH_API_URL, MODEL_API_URL } from '../config/api';
+
 
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -144,7 +146,7 @@ export default function InputPage() {
     }, 3000);
 
     try {
-      const res = await fetch("http://localhost:5000/predict", {
+      const res = await fetch(`${MODEL_API_URL}/predict`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ latitude: parseFloat(lat), longitude: parseFloat(lo) }),

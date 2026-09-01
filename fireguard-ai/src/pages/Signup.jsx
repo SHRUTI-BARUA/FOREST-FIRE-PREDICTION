@@ -4,6 +4,8 @@ import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "../styles/auth.css";
+import { AUTH_API_URL, MODEL_API_URL } from '../config/api';
+
 
 const Signup = () => {
   const navigate = useNavigate();
@@ -74,7 +76,7 @@ const Signup = () => {
 
     try {
       const { data } = await axios.post(
-        "http://localhost:4000/signup",
+        `${AUTH_API_URL}/signup`,
         {
           email: emailTrim,
           username: usernameTrim,

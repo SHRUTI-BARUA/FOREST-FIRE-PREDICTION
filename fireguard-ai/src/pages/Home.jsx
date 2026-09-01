@@ -3,6 +3,8 @@ import { useNavigate, useLocation } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import FeatureCard from "../components/FeatureCard";
 import "../styles/Home.css";
+import { AUTH_API_URL, MODEL_API_URL } from '../config/api';
+
 
 export default function Home() {
   const navigate = useNavigate();
@@ -14,7 +16,7 @@ const isGuest = location.state?.isGuest ?? true;
   useEffect(() => {
   const checkAuth = async () => {
     try {
-      const res = await fetch("http://localhost:4000/check-auth", {
+      const res = await fetch(`${AUTH_API_URL}/check-auth`, {
         credentials: "include",
       });
 

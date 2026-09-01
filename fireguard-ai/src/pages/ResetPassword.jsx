@@ -3,6 +3,8 @@ import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { toast, ToastContainer } from "react-toastify";
 import "../styles/auth.css";
+import { AUTH_API_URL, MODEL_API_URL } from '../config/api';
+
 
 const ResetPassword = () => {
   const { token } = useParams();

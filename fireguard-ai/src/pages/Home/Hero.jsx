@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "./Hero.css";
+import { AUTH_API_URL, MODEL_API_URL } from '../../config/api';
+
 
 export default function Hero() {
   const navigate = useNavigate();
@@ -52,7 +54,7 @@ export default function Hero() {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const res = await fetch("http://localhost:4000/check-auth", {
+        const res = await fetch(`${AUTH_API_URL}/check-auth`, {
           credentials: "include",
         });
         const data = await res.json();

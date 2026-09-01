@@ -4,6 +4,8 @@ import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "../styles/auth.css";
+import { AUTH_API_URL, MODEL_API_URL } from '../config/api';
+
 
 const Login = () => {
   const navigate = useNavigate();
@@ -39,7 +41,7 @@ const Login = () => {
     e.preventDefault();
     try {
       const { data } = await axios.post(
-        "http://localhost:4000/login",
+        `${AUTH_API_URL}/login`,
         { ...inputValue },
         { withCredentials: true }
       );

@@ -3,6 +3,8 @@ import axios from "axios";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "../styles/auth.css";
+import { AUTH_API_URL, MODEL_API_URL } from '../config/api';
+
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState("");
@@ -12,7 +14,7 @@ const ForgotPassword = () => {
 
     try {
       const { data } = await axios.post(
-        "http://localhost:4000/forgot-password",
+        `${AUTH_API_URL}/forgot-password`,
         { email }
       );
 

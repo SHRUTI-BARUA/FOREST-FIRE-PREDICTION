@@ -110,7 +110,31 @@ except Exception as e:
 
 # ================= LIVE DATA HELPERS =================
 # ================= NEW FUNCTION (ADDED) =================
-landcover_dataset = rasterio.open("landcover.tif")
+
+LANDCOVER_FILE = "landcover.tif"
+LANDCOVER_DOWNLOAD_URL = os.environ.get("LANDCOVER_DOWNLOAD_URL", "") # e.g., Direct GDrive download link
+
+if not os.path.exists(LANDCOVER_FILE):
+    if LANDCOVER_DOWNLOAD_URL:
+        print(f"Downloading {LANDCOVER_FILE} from {LANDCOVER_DOWNLOAD_URL}...")
+        try:
+            response = requests.get(LANDCOVER_DOWNLOAD_URL, stream=True)
+            response.raise_for_status()
+            with open(LANDCOVER_FILE, "wb") as f:
+                for chunk in response.iter_content(chunk_size=8192):
+                    f.write(chunk)
+            print("Download complete.")
+        except Exception as e:
+            print(f"Error downloading {LANDCOVER_FILE}: {e}")
+    else:
+        print(f"WARNING: {LANDCOVER_FILE} not found and LANDCOVER_DOWNLOAD_URL is not set.")
+
+try:
+    landcover_dataset = rasterio.open(LANDCOVER_FILE)
+except Exception as e:
+    print(f"Error opening {LANDCOVER_FILE}: {e}")
+    landcover_dataset = None
+
 
 
 def get_landcover(lat, lon):
@@ -118,6 +142,8 @@ def get_landcover(lat, lon):
     Optimized to use the globally opened landcover_dataset for speed.
     """
     try:
+        if landcover_dataset is None:
+            return 30
         for val in landcover_dataset.sample([(lon, lat)]):
             return int(val[0])
         return 30
