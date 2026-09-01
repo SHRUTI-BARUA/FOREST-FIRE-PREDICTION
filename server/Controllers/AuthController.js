@@ -298,10 +298,14 @@ module.exports.Login = async (req, res) => {
 module.exports.ForgotPassword = async (req, res) => {
   try {
     const { email } = req.body;
+    if (!email) {
+      return res.status(400).json({ success: false, message: "Email is required" });
+    }
 
-    const user = await User.findOne({ email });
-    if (!user)
-      return res.json({ success: false, message: "User not found" });
+    const user = await User.findOne({ email: email.toLowerCase().trim() });
+    if (!user) {
+      return res.json({ success: false, message: "No registered account found with this email" });
+    }
 
     const resetToken = crypto.randomBytes(32).toString("hex");
     const hashedToken = crypto
@@ -313,28 +317,54 @@ module.exports.ForgotPassword = async (req, res) => {
     user.resetPasswordExpires = Date.now() + 15 * 60 * 1000;
     await user.save();
 
-    const resetLink = `http://localhost:3000/reset-password/${resetToken}`;
+    const frontendBase = process.env.FRONTEND_URL || "https://forest-fire-prediction-weld.vercel.app";
+    const resetLink = `${frontendBase}/reset-password/${resetToken}`;
 
-    const transporter = nodemailer.createTransport({
-      host: "smtp.gmail.com",
-      port: 587,
-      secure: false,
-      auth: {
-        user: process.env.EMAIL,
-        pass: process.env.EMAIL_PASS,
-      },
-    });
+    if (process.env.EMAIL && process.env.EMAIL_PASS) {
+      try {
+        const transporter = nodemailer.createTransport({
+          host: "smtp.gmail.com",
+          port: 587,
+          secure: false,
+          auth: {
+            user: process.env.EMAIL,
+            pass: process.env.EMAIL_PASS,
+          },
+        });
 
-    await transporter.sendMail({
-      from: `"Forest Fire Support" <${process.env.EMAIL}>`,
-      to: user.email,
-      subject: "Password Reset",
-      html: `<a href="${resetLink}">${resetLink}</a>`,
-    });
+        await transporter.sendMail({
+          from: `"Forest Fire Support" <${process.env.EMAIL}>`,
+          to: user.email,
+          subject: "Reset Your ForestGuard Password",
+          html: `
+            <div style="font-family: Arial, sans-serif; padding: 20px; color: #333;">
+              <h2 style="color: #e67e22;">Password Reset Request</h2>
+              <p>We received a request to reset your ForestGuard account password.</p>
+              <p>Click the button below to choose a new password (valid for 15 minutes):</p>
+              <p style="margin: 20px 0;">
+                <a href="${resetLink}" style="background-color: #e67e22; color: #ffffff; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; display: inline-block;">Reset Password</a>
+              </p>
+              <p>Or paste this link into your browser:</p>
+              <p><a href="${resetLink}">${resetLink}</a></p>
+              <p style="color: #888; font-size: 12px; margin-top: 25px;">If you didn't request this reset, you can safely ignore this email.</p>
+            </div>
+          `,
+        });
+      } catch (mailError) {
+        console.error("Nodemailer reset error:", mailError.message);
+        return res.status(500).json({
+          success: false,
+          message: "Unable to deliver reset email. Please try again or check support.",
+        });
+      }
+    } else {
+      console.warn("EMAIL credentials not set; email dispatch skipped.");
+    }
 
-    res.json({ success: true, message: "Reset email sent" });
+    res.json({ success: true, message: "Password reset link sent! Check your inbox." });
   } catch (error) {
-    res.status(500).json({ success: false });
+    console.error("ForgotPassword error:", error);
+    res.status(500).json({ success: false, message: error.message || "Failed to process request" });
   }
 };
 
@@ -346,6 +376,13 @@ module.exports.ResetPassword = async (req, res) => {
     const { token } = req.params;
     const { password } = req.body;
 
+    if (!password || password.length < 8) {
+      return res.json({
+        success: false,
+        message: "Password must be at least 8 characters",
+      });
+    }
+
     const hashedToken = crypto
       .createHash("sha256")
       .update(token)
@@ -356,17 +393,25 @@ module.exports.ResetPassword = async (req, res) => {
       resetPasswordExpires: { $gt: Date.now() },
     });
 
-    if (!user)
-      return res.json({ success: false, message: "Invalid or expired token" });
+    if (!user) {
+      return res.json({
+        success: false,
+        message: "Password reset link is invalid or has expired.",
+      });
+    }
 
     user.password = await bcrypt.hash(password, 10);
     user.resetPasswordToken = undefined;
     user.resetPasswordExpires = undefined;
     await user.save();
 
-    res.json({ success: true, message: "Password reset successful" });
+    res.json({
+      success: true,
+      message: "Password reset successful! You can now log in.",
+    });
   } catch (error) {
-    res.status(500).json({ success: false });
+    console.error("ResetPassword error:", error);
+    res.status(500).json({ success: false, message: error.message || "Failed to reset password" });
   }
 };
 

@@ -6,7 +6,14 @@ import { AUTH_API_URL, MODEL_API_URL } from '../../config/api';
 
 export default function Hero() {
   const navigate = useNavigate();
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState(() => {
+    try {
+      const saved = localStorage.getItem("user");
+      return saved ? JSON.parse(saved) : null;
+    } catch {
+      return null;
+    }
+  });
   const [showAuthPopup, setShowAuthPopup] = useState(false);
   const [currentSlide, setCurrentSlide] = useState(0);
 
@@ -46,7 +53,7 @@ export default function Hero() {
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % slides.length);
-    }, 5000); // 5 seconds for better reading time
+    }, 5000);
     return () => clearInterval(interval);
   }, [slides.length]);
 
@@ -54,30 +61,68 @@ export default function Hero() {
   useEffect(() => {
     const checkAuth = async () => {
       try {
+        const token = localStorage.getItem("token");
+        const headers = {};
+        if (token) headers["Authorization"] = `Bearer ${token}`;
+
         const res = await fetch(`${AUTH_API_URL}/check-auth`, {
+          method: "GET",
+          headers,
           credentials: "include",
         });
         const data = await res.json();
-        if (data.status) setUser(data.user);
-        else setUser(null);
+        if (data.status && data.user) {
+          setUser(data.user);
+          localStorage.setItem("user", JSON.stringify(data.user));
+        } else if (!token && !localStorage.getItem("user")) {
+          setUser(null);
+        }
       } catch {
-        setUser(null);
+        try {
+          const saved = localStorage.getItem("user");
+          if (saved) setUser(JSON.parse(saved));
+        } catch {}
       }
     };
     checkAuth();
+
+    const handleAuthChange = () => {
+      try {
+        const saved = localStorage.getItem("user");
+        setUser(saved ? JSON.parse(saved) : null);
+      } catch {
+        setUser(null);
+      }
+      checkAuth();
+    };
+
+    window.addEventListener("authChange", handleAuthChange);
+    window.addEventListener("storage", handleAuthChange);
+    return () => {
+      window.removeEventListener("authChange", handleAuthChange);
+      window.removeEventListener("storage", handleAuthChange);
+    };
   }, []);
 
   const handleStartAnalysis = () => {
-    if (!user) {
+    let activeUser = user;
+    if (!activeUser) {
+      try {
+        const saved = localStorage.getItem("user");
+        if (saved) activeUser = JSON.parse(saved);
+      } catch {}
+    }
+
+    if (!activeUser) {
       setShowAuthPopup(true);
     } else {
-      navigate("/input", { state: { isGuest: false } });
+      navigate("/input", { state: { isGuest: false, user: activeUser } });
     }
   };
 
   const handleGuestMode = () => {
     setShowAuthPopup(false);
-    navigate("/input", { state: { isGuest: true } });
+    navigate("/input", { state: { isGuest: true, user: null } });
   };
 
   return (
