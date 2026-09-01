@@ -9,32 +9,69 @@ import { AUTH_API_URL, MODEL_API_URL } from '../config/api';
 export default function Home() {
   const navigate = useNavigate();
   const location = useLocation();
-const isGuest = location.state?.isGuest ?? true;
-  const [user, setUser] = useState(null);
+  const isGuest = location.state?.isGuest ?? true;
+  const [user, setUser] = useState(() => {
+    if (location.state?.user) return location.state.user;
+    try {
+      const saved = localStorage.getItem("user");
+      return saved ? JSON.parse(saved) : null;
+    } catch {
+      return null;
+    }
+  });
   const [showAuthPopup, setShowAuthPopup] = useState(false);
 
   useEffect(() => {
-  const checkAuth = async () => {
-    try {
-      const res = await fetch(`${AUTH_API_URL}/check-auth`, {
-        credentials: "include",
-      });
+    const checkAuth = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        const headers = {};
+        if (token) {
+          headers["Authorization"] = `Bearer ${token}`;
+        }
 
-      const data = await res.json();
+        const res = await fetch(`${AUTH_API_URL}/check-auth`, {
+          method: "GET",
+          headers,
+          credentials: "include",
+        });
 
-      if (data.status) {
-        setUser(data.user);
-      } else {
+        const data = await res.json();
+
+        if (data.status && data.user) {
+          setUser(data.user);
+          localStorage.setItem("user", JSON.stringify(data.user));
+        } else if (!token && !localStorage.getItem("user")) {
+          setUser(null);
+        }
+      } catch (err) {
+        try {
+          const saved = localStorage.getItem("user");
+          if (saved) setUser(JSON.parse(saved));
+        } catch {}
+      }
+    };
+
+    checkAuth();
+
+    const handleAuthChange = () => {
+      try {
+        const saved = localStorage.getItem("user");
+        setUser(saved ? JSON.parse(saved) : null);
+      } catch {
         setUser(null);
       }
-    } catch (err) {
-      console.error("Auth check failed");
-      setUser(null);
-    }
-  };
+      checkAuth();
+    };
 
-  checkAuth();
-}, []);
+    window.addEventListener("authChange", handleAuthChange);
+    window.addEventListener("storage", handleAuthChange);
+
+    return () => {
+      window.removeEventListener("authChange", handleAuthChange);
+      window.removeEventListener("storage", handleAuthChange);
+    };
+  }, [location]);
 
 
   // 🔥 When user clicks Check Fire Risk

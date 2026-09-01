@@ -8,55 +8,96 @@ export default function Navbar() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const [user, setUser] = useState(null);
+  // ✅ Initialize immediately from localStorage for instant, flicker-free rendering
+  const [user, setUser] = useState(() => {
+    try {
+      const saved = localStorage.getItem("user");
+      return saved ? JSON.parse(saved) : null;
+    } catch {
+      return null;
+    }
+  });
 
   // ✅ Get guest mode from route state (matches Home.jsx)
   const isGuest = location.state?.isGuest === true;
 
-  // ✅ Check auth whenever route changes
-  useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        const AUTH_API_URL = import.meta.env.VITE_AUTH_API_URL || AUTH_API_URL;
-        const res = await fetch(`${AUTH_API_URL}/check-auth`, {
-          method: "GET",
-          credentials: "include",
-        });
+  // ✅ Check auth whenever route changes or storage event fires
+  const checkAuth = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const headers = {};
+      if (token) {
+        headers["Authorization"] = `Bearer ${token}`;
+      }
 
-        const data = await res.json();
+      const res = await fetch(`${AUTH_API_URL}/check-auth`, {
+        method: "GET",
+        headers,
+        credentials: "include",
+      });
 
-        if (data.status) {
-          setUser(data.user);
-        } else {
-          setUser(null);
-        }
-      } catch (err) {
+      const data = await res.json();
+
+      if (data.status && data.user) {
+        setUser(data.user);
+        localStorage.setItem("user", JSON.stringify(data.user));
+      } else if (!token && !localStorage.getItem("user")) {
         setUser(null);
       }
+    } catch (err) {
+      // Keep existing local user on network glitch
+      try {
+        const saved = localStorage.getItem("user");
+        if (saved) setUser(JSON.parse(saved));
+      } catch {}
+    }
+  };
+
+  useEffect(() => {
+    checkAuth();
+
+    const handleAuthChange = () => {
+      try {
+        const saved = localStorage.getItem("user");
+        setUser(saved ? JSON.parse(saved) : null);
+      } catch {
+        setUser(null);
+      }
+      checkAuth();
     };
 
-    checkAuth();
+    window.addEventListener("authChange", handleAuthChange);
+    window.addEventListener("storage", handleAuthChange);
+
+    return () => {
+      window.removeEventListener("authChange", handleAuthChange);
+      window.removeEventListener("storage", handleAuthChange);
+    };
   }, [location]);
 
-  // ✅ Logout (original logic kept)
+  // ✅ Logout
   const handleLogout = async () => {
     try {
       await fetch(`${AUTH_API_URL}/logout`, {
         method: "POST",
         credentials: "include",
       });
-
-      setUser(null);
-      navigate("/");
     } catch (err) {
       console.log("Logout failed");
+    } finally {
+      localStorage.removeItem("user");
+      localStorage.removeItem("token");
+      setUser(null);
+      window.dispatchEvent(new Event("authChange"));
+      navigate("/");
     }
   };
 
   // ✅ Protected Navigation (FIXED)
   const handleProtectedRoute = (path) => {
-    if (user || isGuest) {
-      navigate(path, { state: { isGuest } });
+    const activeUser = user || (localStorage.getItem("user") ? JSON.parse(localStorage.getItem("user")) : null);
+    if (activeUser || isGuest) {
+      navigate(path, { state: { isGuest, user: activeUser } });
     } else {
       alert("Please login, signup, or continue as Guest to access this page.");
       navigate("/");

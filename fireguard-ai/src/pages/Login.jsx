@@ -50,18 +50,25 @@ const Login = () => {
 
       if (success) {
         // ✅ 1. Extract the unique ID (check for both .id and ._id)
-        const userId = user._id || user.id;
+        const userId = user._id || user.id || user;
 
         // ✅ 2. Construct a clean user object for the state
         const userData = {
           id: userId,
-          username: user.username || user.email, // Fallback to email if username is null
-          email: user.email,
+          _id: userId,
+          username: user.username || user.email || (typeof user === "string" ? user : "User"),
+          email: user.email || "",
           isVerified
         };
 
-        // ✅ 3. Store in localStorage as backup for refreshes
+        // ✅ 3. Store in localStorage
         localStorage.setItem("user", JSON.stringify(userData));
+        if (data.token) {
+          localStorage.setItem("token", data.token);
+        }
+
+        // Notify other components like Navbar
+        window.dispatchEvent(new Event("authChange"));
 
         handleSuccess(message);
 

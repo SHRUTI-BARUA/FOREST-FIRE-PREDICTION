@@ -425,13 +425,14 @@ module.exports.SaveLocation = async (req, res) => {
 
 module.exports.CheckAuth = async (req, res) => {
   try {
-    const token = req.cookies.token;
+    const token = req.cookies.token || req.headers.authorization?.split(" ")[1];
 
     if (!token) {
       return res.json({ status: false });
     }
 
-    const decoded = jwt.verify(token, process.env.TOKEN_KEY);
+    const secretKey = process.env.TOKEN_KEY || "mySuperStrongSecretKey123";
+    const decoded = jwt.verify(token, secretKey);
     const user = await User.findById(decoded.id).select("-password");
 
     if (!user) {
@@ -442,11 +443,12 @@ module.exports.CheckAuth = async (req, res) => {
       status: true,
       user: {
         id: user._id,
+        _id: user._id,
         email: user.email,
         username: user.username,
         phoneNumber: user.phoneNumber,
-        latitude: user.latitude, // Added
-        longitude: user.longitude, // Added
+        latitude: user.latitude,
+        longitude: user.longitude,
       },
     });
   } catch (err) {
@@ -455,10 +457,11 @@ module.exports.CheckAuth = async (req, res) => {
 };
 
 module.exports.Logout = (req, res) => {
+  const isProd = process.env.NODE_ENV === "production" || !process.env.FRONTEND_URL?.includes("localhost");
   res.clearCookie("token", {
     httpOnly: true,
-    sameSite: "Lax",
-    secure: false,
+    sameSite: isProd ? "None" : "Lax",
+    secure: isProd ? true : false,
   });
 
   return res.json({ success: true, message: "Logged out successfully" });
