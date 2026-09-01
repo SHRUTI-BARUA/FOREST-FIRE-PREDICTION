@@ -9,7 +9,7 @@ import { AUTH_API_URL, MODEL_API_URL } from '../config/api';
 export default function Home() {
   const navigate = useNavigate();
   const location = useLocation();
-  const isGuest = location.state?.isGuest ?? true;
+  const isGuest = location.state?.isGuest === true;
   const [user, setUser] = useState(() => {
     if (location.state?.user) return location.state.user;
     try {
@@ -75,31 +75,31 @@ export default function Home() {
 
 
   // 🔥 When user clicks Check Fire Risk
-  // const handleStartAnalysis = () => {
-  //   if (!user) {
-  //     setShowAuthPopup(true); // show popup only after click
-  //   } else {
-  //     navigate("/input", { state: { isGuest: false, user: user} });
-  //   }
-  // };
   const handleStartAnalysis = () => {
-  if (!user) {
-    setShowAuthPopup(true);
-  } else {
-    // ⚠️ CRITICAL: Make sure 'user' here is the one from your useEffect/Auth check
-    console.log("Navigating with user:", user); 
-    navigate("/input", { 
-      state: { 
-        isGuest: false, 
-        user: user // This must contain the 'id' seen in your logs
-      } 
-    });
-  }
-};
+    let activeUser = user;
+    if (!activeUser) {
+      try {
+        const saved = localStorage.getItem("user");
+        if (saved) activeUser = JSON.parse(saved);
+      } catch {}
+    }
+
+    if (!activeUser) {
+      setShowAuthPopup(true);
+    } else {
+      console.log("Navigating with user:", activeUser); 
+      navigate("/input", { 
+        state: { 
+          isGuest: false, 
+          user: activeUser
+        } 
+      });
+    }
+  };
 
   const handleGuestMode = () => {
     setShowAuthPopup(false);
-    navigate("/input", { state: { isGuest: true } });
+    navigate("/input", { state: { isGuest: true, user: null } });
   };
 
   return (
