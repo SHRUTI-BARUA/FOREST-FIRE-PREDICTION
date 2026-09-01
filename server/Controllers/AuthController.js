@@ -55,7 +55,8 @@ module.exports.Signup = async (req, res) => {
 
       await existingUser.save();
 
-      const verifyLink = `http://localhost:3000/verify-email/${verifyToken}`;
+      const frontendBase = process.env.FRONTEND_URL || "http://localhost:3000";
+      const verifyLink = `${frontendBase}/verify-email/${verifyToken}`;
 
       const transporter = nodemailer.createTransport({
         host: "smtp.gmail.com",
@@ -130,7 +131,8 @@ module.exports.Signup = async (req, res) => {
       emailVerificationExpires: Date.now() + 24 * 60 * 60 * 1000,
     });
 
-    const verifyLink = `http://localhost:3000/verify-email/${verifyToken}`;
+    const frontendBase = process.env.FRONTEND_URL || "http://localhost:3000";
+    const verifyLink = `${frontendBase}/verify-email/${verifyToken}`;
 
     const transporter = nodemailer.createTransport({
       host: "smtp.gmail.com",
@@ -236,10 +238,12 @@ module.exports.Login = async (req, res) => {
 
     const token = createSecretToken(user);
 
+    const isProd = process.env.NODE_ENV === "production" || !process.env.FRONTEND_URL?.includes("localhost");
+
     res.cookie("token", token, {
       httpOnly: true,
-      sameSite: "Lax",
-      secure: false,
+      sameSite: isProd ? "None" : "Lax",
+      secure: isProd ? true : false,
       maxAge: 3 * 24 * 60 * 60 * 1000,
     });
 

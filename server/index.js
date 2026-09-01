@@ -23,10 +23,26 @@ mongoose
 
 const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:3000";
 
+const allowedOrigins = [
+    FRONTEND_URL,
+    "http://localhost:3000",
+    "http://localhost:5173",
+].filter(Boolean);
+
 // ✅ Middlewares
 app.use(
     cors({
-        origin: FRONTEND_URL,
+        origin: function (origin, callback) {
+            if (!origin) return callback(null, true);
+            if (
+                allowedOrigins.includes(origin) ||
+                origin.endsWith(".vercel.app") ||
+                origin.includes("localhost")
+            ) {
+                return callback(null, true);
+            }
+            return callback(null, true);
+        },
         credentials: true,
         methods: ["GET", "POST", "PUT", "DELETE"],
     })
