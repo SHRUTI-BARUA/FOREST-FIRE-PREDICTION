@@ -112,18 +112,38 @@ except Exception as e:
 # ================= NEW FUNCTION (ADDED) =================
 
 LANDCOVER_FILE = "landcover.tif"
-LANDCOVER_DOWNLOAD_URL = os.environ.get("LANDCOVER_DOWNLOAD_URL", "") # e.g., Direct GDrive download link
+LANDCOVER_DOWNLOAD_URL = os.environ.get("LANDCOVER_DOWNLOAD_URL", "")
+
+def download_landcover(url, destination):
+    import re
+    print(f"Downloading {destination} from {url}...")
+    if "drive.google.com" in url:
+        match = re.search(r'/d/([a-zA-Z0-9_-]+)', url) or re.search(r'id=([a-zA-Z0-9_-]+)', url)
+        file_id = match.group(1) if match else url
+        session = requests.Session()
+        gdrive_url = "https://docs.google.com/uc?export=download"
+        response = session.get(gdrive_url, params={'id': file_id, 'confirm': 't'}, stream=True)
+        token = None
+        for key, value in response.cookies.items():
+            if key.startswith('download_warning'):
+                token = value
+                break
+        if token:
+            response = session.get(gdrive_url, params={'id': file_id, 'confirm': token}, stream=True)
+    else:
+        response = requests.get(url, stream=True)
+    
+    response.raise_for_status()
+    with open(destination, "wb") as f:
+        for chunk in response.iter_content(chunk_size=32768):
+            if chunk:
+                f.write(chunk)
+    print("Download complete.")
 
 if not os.path.exists(LANDCOVER_FILE):
     if LANDCOVER_DOWNLOAD_URL:
-        print(f"Downloading {LANDCOVER_FILE} from {LANDCOVER_DOWNLOAD_URL}...")
         try:
-            response = requests.get(LANDCOVER_DOWNLOAD_URL, stream=True)
-            response.raise_for_status()
-            with open(LANDCOVER_FILE, "wb") as f:
-                for chunk in response.iter_content(chunk_size=8192):
-                    f.write(chunk)
-            print("Download complete.")
+            download_landcover(LANDCOVER_DOWNLOAD_URL, LANDCOVER_FILE)
         except Exception as e:
             print(f"Error downloading {LANDCOVER_FILE}: {e}")
     else:
