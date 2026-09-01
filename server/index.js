@@ -62,7 +62,14 @@ app.use("/api", fireRiskRoute);
 app.use("/api/predictions", predictionRoutes);
 
 app.get("/", (req, res) => {
-    res.send("🔥 Root route is working!!");
+    const states = ["disconnected", "connected", "connecting", "disconnecting"];
+    const dbState = states[mongoose.connection.readyState] || "unknown";
+    res.json({
+        status: "online",
+        service: "Forest Fire Node API",
+        database: dbState,
+        connected: mongoose.connection.readyState === 1
+    });
 });
 
 // ✅ Start server

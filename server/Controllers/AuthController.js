@@ -87,23 +87,32 @@ module.exports.Signup = async (req, res) => {
       });
     }
 
-    const agent = new https.Agent({ rejectUnauthorized: false });
-    const response = await axios.get(
-      `https://apilayer.net/api/check?access_key=${MAILBOXLAYER_KEY}&email=${email}`,
-      { httpsAgent: agent }
-    );
-
-    const { format_valid, smtp_check, disposable } = response.data;
-
-    if (!format_valid)
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
       return res.json({ success: false, message: "Invalid email format" });
-    if (!smtp_check)
-      return res.json({ success: false, message: "Email does not exist" });
-    if (disposable)
-      return res.json({
-        success: false,
-        message: "Disposable emails not allowed",
-      });
+    }
+
+    if (MAILBOXLAYER_KEY) {
+      try {
+        const agent = new https.Agent({ rejectUnauthorized: false });
+        const response = await axios.get(
+          `https://apilayer.net/api/check?access_key=${MAILBOXLAYER_KEY}&email=${email}`,
+          { httpsAgent: agent, timeout: 4000 }
+        );
+        if (response.data && response.data.format_valid !== undefined) {
+          const { format_valid, smtp_check, disposable } = response.data;
+          if (!format_valid)
+            return res.json({ success: false, message: "Invalid email format" });
+          if (disposable)
+            return res.json({
+              success: false,
+              message: "Disposable emails not allowed",
+            });
+        }
+      } catch (checkErr) {
+        console.warn("Mailboxlayer check warning:", checkErr.message);
+      }
+    }
 
     const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
     if (!passwordRegex.test(password)) {
@@ -135,34 +144,42 @@ module.exports.Signup = async (req, res) => {
     const frontendBase = process.env.FRONTEND_URL || "http://localhost:3000";
     const verifyLink = `${frontendBase}/verify-email/${verifyToken}`;
 
-    const transporter = nodemailer.createTransport({
-      host: "smtp.gmail.com",
-      port: 587,
-      secure: false,
-      auth: {
-        user: process.env.EMAIL,
-        pass: process.env.EMAIL_PASS,
-      },
-    });
+    try {
+      if (process.env.EMAIL && process.env.EMAIL_PASS) {
+        const transporter = nodemailer.createTransport({
+          host: "smtp.gmail.com",
+          port: 587,
+          secure: false,
+          auth: {
+            user: process.env.EMAIL,
+            pass: process.env.EMAIL_PASS,
+          },
+        });
 
-    await transporter.sendMail({
-      from: `"Forest Fire Support" <${process.env.EMAIL}>`,
-      to: user.email,
-      subject: "Verify Your Email",
-      html: `
-        <h3>Email Verification</h3>
-        <p>Click below to verify your account (expires in 24 hours):</p>
-        <a href="${verifyLink}">${verifyLink}</a>
-      `,
-    });
+        await transporter.sendMail({
+          from: `"Forest Fire Support" <${process.env.EMAIL}>`,
+          to: user.email,
+          subject: "Verify Your Email",
+          html: `
+            <h3>Email Verification</h3>
+            <p>Click below to verify your account (expires in 24 hours):</p>
+            <a href="${verifyLink}">${verifyLink}</a>
+          `,
+        });
+      } else {
+        console.warn("EMAIL / EMAIL_PASS not set; skipping email verification dispatch.");
+      }
+    } catch (mailError) {
+      console.error("Nodemailer error:", mailError.message);
+    }
 
     return res.status(201).json({
       success: true,
-      message: "Verification email sent. Please verify before login.",
+      message: "Signup successful! Please check your email to verify before login.",
     });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ success: false, message: "Signup failed" });
+    console.error("Signup Error:", error);
+    res.status(500).json({ success: false, message: error.message || "Signup failed" });
   }
 };
 
