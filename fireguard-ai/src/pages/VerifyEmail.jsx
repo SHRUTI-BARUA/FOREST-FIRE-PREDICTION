@@ -13,7 +13,7 @@ export default function VerifyEmail() {
     const verifyUser = async () => {
       try {
         const res = await axios.get(
-          `http://localhost:4000/verify-email/${token}`,
+          `${AUTH_API_URL}/verify-email/${token}`,
           { withCredentials: true }
         );
 

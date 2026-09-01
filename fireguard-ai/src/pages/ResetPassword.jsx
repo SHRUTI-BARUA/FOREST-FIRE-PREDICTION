@@ -19,7 +19,7 @@ const ResetPassword = () => {
     e.preventDefault();
     try {
       const { data } = await axios.post(
-        `http://localhost:4000/reset-password/${token}`,
+        `${AUTH_API_URL}/reset-password/${token}`,
         { password }
       );
 
