@@ -14,10 +14,11 @@ const MAILBOXLAYER_KEY = process.env.MAILBOXLAYER_KEY || "";
 ------------------------------------------------------------- */
 module.exports.userVerification = (req, res) => {
   try {
-    const token = req.cookies.token;
+    const token = req.cookies.token || req.headers.authorization?.split(" ")[1];
     if (!token) return res.json({ status: false });
 
-    jwt.verify(token, process.env.TOKEN_KEY, async (err, data) => {
+    const secretKey = process.env.TOKEN_KEY || "mySuperStrongSecretKey123";
+    jwt.verify(token, secretKey, async (err, data) => {
       if (err) return res.json({ status: false });
       return res.json({ status: true, user: data });
     });
@@ -216,6 +217,13 @@ module.exports.Login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
+    if (!email || !password) {
+      return res.json({
+        success: false,
+        message: "All fields are required",
+      });
+    }
+
     const user = await User.findOne({ email });
     if (!user)
       return res.json({
@@ -250,11 +258,20 @@ module.exports.Login = async (req, res) => {
     return res.json({
       success: true,
       message: "Login successful",
-      user: user.username,
+      token: token,
+      user: {
+        _id: user._id,
+        id: user._id,
+        username: user.username,
+        email: user.email,
+        phoneNumber: user.phoneNumber,
+        isVerified: user.isVerified,
+      },
+      isVerified: user.isVerified,
     });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ success: false, message: "Login failed" });
+    console.error("Login Error:", error);
+    res.status(500).json({ success: false, message: error.message || "Login failed" });
   }
 };
 
