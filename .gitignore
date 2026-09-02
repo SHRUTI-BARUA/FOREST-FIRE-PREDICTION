@@ -21,4 +21,8 @@ server/model/gee-service-account.json
 gee-service-account.json
 
 # Large binary model/data files (add separately or via Git LFS)
+*.tif
+*.tiff
 server/model/landcover.tif
+landcover.tif
+scratch_*.py
